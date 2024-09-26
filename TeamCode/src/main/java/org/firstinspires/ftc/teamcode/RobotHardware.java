@@ -35,7 +35,7 @@ public class RobotHardware {
         rail = hwMap.get(DcMotor.class, "railRAIL");
         zero_position = rail.getCurrentPosition();
 
-        telemetry.addLine(String.format("Zero Position: %i", zero_position));
+        telemetry.addLine(String.format("Zero Position: %d", zero_position));
 
         lfDrive.setDirection(DcMotor.Direction.FORWARD);
         lbDrive.setDirection(DcMotor.Direction.FORWARD);
