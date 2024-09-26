@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,14 +16,8 @@ public class RobotHardware {
     public DcMotor rbDrive;
     public DcMotor rfDrive;
     public DcMotor rail;
+    public int zero_position;
 
-    // For Odometry
-    // 35mm omniwheel = 1.37795 inches
-    public final double COUNTS_PER_ROTATION = 1024;
-    public final double ROTATION_PER_INCH = 1.0 / (1.37795 * Math.PI);
-    public final double COUNTS_PER_INCH = COUNTS_PER_ROTATION * ROTATION_PER_INCH; // CPR * RPI
-    public DcMotorEx encoderL;
-    public DcMotorEx encoderR;
 
     private ElapsedTime period = new ElapsedTime();
 
@@ -31,16 +27,15 @@ public class RobotHardware {
         // Save reference to Hardware map
         hwMap = ahwMap;
 
-        // Initialize Odometry Hardware
-        encoderL = hwMap.get(DcMotorEx.class, "encoderL");
-        encoderR = hwMap.get(DcMotorEx.class, "encoderR");
-
         // Define and Initialize Motors
         lfDrive = hwMap.get(DcMotor.class, "motorFL");
         lbDrive = hwMap.get(DcMotor.class, "motorBL");
         rfDrive = hwMap.get(DcMotor.class, "motorFR");
         rbDrive = hwMap.get(DcMotor.class, "motorBR");
         rail = hwMap.get(DcMotor.class, "railRAIL");
+        zero_position = rail.getCurrentPosition();
+
+        telemetry.addLine(String.format("Zero Position: %i", zero_position));
 
         lfDrive.setDirection(DcMotor.Direction.FORWARD);
         lbDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -53,7 +48,7 @@ public class RobotHardware {
         lbDrive.setPower(0);
         rfDrive.setPower(0);
         rbDrive.setPower(0);
-        rail.setTargetPosition(0);
+        rail.setTargetPosition(zero_position);
 
         lfDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lbDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
