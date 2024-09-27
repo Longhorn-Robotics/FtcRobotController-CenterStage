@@ -9,8 +9,8 @@ public class TeleopLite extends OpMode {
     /* Declare OpMode members. */
     RobotHardware robot = new RobotHardware(); // use the class created to define a Pushbot's hardware
 
-    double odometryLinitial;
-    double odometryRinitial;
+//    double odometryLinitial;
+//    double odometryRinitial;
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -22,9 +22,10 @@ public class TeleopLite extends OpMode {
         robot.init(hardwareMap);
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Hello thomas");
+        telemetry.addLine(String.format("Zero Position: %d", robot.rail.getCurrentPosition()));
 
-        odometryLinitial = robot.encoderL.getCurrentPosition();
-        odometryRinitial = robot.encoderR.getCurrentPosition();
+//        odometryLinitial = robot.encoderL.getCurrentPosition();
+//        odometryRinitial = robot.encoderR.getCurrentPosition();
     }
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -47,7 +48,7 @@ public class TeleopLite extends OpMode {
         double final_throttle = 0.0;
         double final_strafe = 0.0;
         double final_yaw = 0.0;
-        
+
         double joystickMultiplier = joystickBaseSpeed + (1.0 - gamepad1.right_trigger);
 
         // Movement speed for IDCSC (Intelligent Dynamic Cruise Speed Control)
@@ -71,13 +72,18 @@ public class TeleopLite extends OpMode {
             final_throttle -= idcscSpeed;
         }
         
-        robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
-        robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
-        robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
-        robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
+//        robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
+//        robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
+//        robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
+//        robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
 
-        telemetry.addData("OdometryL: ", (odometryLinitial - robot.encoderL.getCurrentPosition()) / robot.COUNTS_PER_INCH);
-        telemetry.addData("OdometryR: ", (odometryRinitial - robot.encoderR.getCurrentPosition()) / robot.COUNTS_PER_INCH);
+        robot.lfDrive.setPower(0);
+        robot.lbDrive.setPower(0);
+        robot.rfDrive.setPower(0);
+        robot.rbDrive.setPower(0);
+
+//        telemetry.addData("OdometryL: ", (odometryLinitial - robot.encoderL.getCurrentPosition()) / robot.COUNTS_PER_INCH);
+//        telemetry.addData("OdometryR: ", (odometryRinitial - robot.encoderR.getCurrentPosition()) / robot.COUNTS_PER_INCH);
 
         telemetry.update();
     }
