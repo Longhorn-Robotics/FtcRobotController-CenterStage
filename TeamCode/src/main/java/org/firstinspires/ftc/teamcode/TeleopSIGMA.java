@@ -53,6 +53,8 @@ public class TeleopSIGMA extends OpMode {
     @Override
     public void loop() {
         // Final Robot Instructions
+
+        /* WHEELS */
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
@@ -62,11 +64,6 @@ public class TeleopSIGMA extends OpMode {
 
         // Movement speed for IDCSC (Intelligent Dynamic Cruise Speed Control)
 //        double idcscSpeed = gamepad1.right_trigger;
-
-
-        final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
-        final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
-        final_yaw += (gamepad1.right_stick_x * joystickMultiplier);
 
 //        // D-pad movement
 //        if (gamepad1.dpad_left) {
@@ -81,25 +78,33 @@ public class TeleopSIGMA extends OpMode {
 //        if (gamepad1.dpad_up) {
 //            final_throttle -= idcscSpeed;
 //        }
+
+
+        final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
+        final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
+        final_yaw += (gamepad1.right_stick_x * joystickMultiplier);
         
         robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
         robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
         robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
 
+        /* WHEELS DONE*/
+
         telemetry.addLine(String.format("Right Trigger: %6.2f", gamepad1.right_trigger));
 
+        /* LINEAR RAIL */
         railPos += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
 
         // Clamps railPos based on max and min values
-        railPos = Math.min(Math.max(railPos, RAIL_MIN), RAIL_MAX);
-//        if (railPos < RAIL_MIN) railPos = RAIL_MIN
-//        else if (railPos > RAIL_MAX) railPos = RAIL_MAX;
+        railPos = Math.clamp(railPos, RAIL_MIN, RAIL_MAX);
 
         telemetry.addLine(String.format("Rail Position: %d", robot.rail.getCurrentPosition()));
         telemetry.addLine(String.format("Target Position: %d", (int) railPos));
 
         robot.rail.setTargetPosition((int) railPos);
+        
+        /* LINEAR RAIL DONE */
 
         telemetry.update();
     }
