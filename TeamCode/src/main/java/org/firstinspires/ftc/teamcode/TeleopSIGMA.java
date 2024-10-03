@@ -3,12 +3,23 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// S uper
-// I ntegrated
-// G eneral
-// M anagement
-// A lgorithm
-
+/*
+ _____ _____ _____ ___  ___  ___  
+/  ___|_   _|  __ \|  \/  | / _ \ 
+\ `--.  | | | |  \/| .  . |/ /_\ \
+ `--. \ | | | | __ | |\/| ||  _  |
+/\__/ /_| |_| |_\ \| |  | || | | |
+\____/ \___/ \____/\_|  |_/\_| |_/
+  u      n      e      a      l
+  p      t      n      n      g
+  e      e      e      a      o
+  r      g      r      g      r
+         r      a      e      i
+         a      l      m      t
+         t             e      h
+         e             n      m
+         d             t
+*/
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
     // final float DEADZONE = 1.1f;
