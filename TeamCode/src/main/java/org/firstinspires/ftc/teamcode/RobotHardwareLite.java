@@ -1,24 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class RobotHardware {
+public class RobotHardwareLite {
     HardwareMap hwMap;
     public DcMotor lbDrive;
     public DcMotor lfDrive;
     public DcMotor rbDrive;
     public DcMotor rfDrive;
     public DcMotor rail;
-    public DcMotor arm;
-    public Servo claw;
 
     private ElapsedTime period = new ElapsedTime();
 
-    public RobotHardware() {}
+    public RobotHardwareLite() {}
 
     public void init(HardwareMap ahwMap) {
         // Save reference to hardware map
@@ -55,18 +52,5 @@ public class RobotHardware {
         rail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rail.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // Initialize arm motor to run with encoder
-        arm = hwMap.get(DcMotor.class, "armARM");
-        arm.setDirection(DcMotor.Direction.FORWARD);
-        arm.setTargetPosition(0);
-        arm.setPower(0.35);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // Initialize claw servos
-        claw = hwMap.get(Servo.class, "clawCLAW");
     }
 }

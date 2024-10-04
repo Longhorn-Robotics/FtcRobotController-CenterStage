@@ -3,51 +3,50 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// S uper
-// I ntegrated
-// G eneral
-// M anagement
-// A lgorithm
+// Super
+// Integrated
+// General
+// Management
+// Algorithm
 
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
-    // final float DEADZONE = 1.1f;
-    /* Declare OpMode members. */
-    RobotHardware robot = new RobotHardware();
 
-    double railPos = 0.0f;
-    static double RAIL_MIN = 0.0f;
-    static double RAIL_MAX = 3000.0f;
+    static final double RAIL_MIN = 0.0f;
+    static final double RAIL_MAX = 3000.0f;
+    static final double CLAW_OPEN = 0.75f;
+    static final double CLAW_CLOSED = 0.84f;
+    static final double ARM_HIGH = 0.0f;
+    static final double ARM_LOW = 0.0f;
+    // static final double DEADZONE = 1.1f;
+
+    final double joystickBaseSpeed = 0.3f;
+
+    /* Declare OpMode members. */
+    RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
+    double railPosition = 0.0f;
+    double armPosition = 0.0f;
     boolean invert = false;
+
+    boolean circleWasPressed = false;
+    boolean clawOpen = true;
+    double clawPosition = CLAW_OPEN;
 
     // Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
-        /*
-         * Initialize the hardware variables.
-         * The init() method of the hardware class does all the work here
-         */
         robot.init(hardwareMap);
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Hello thomas");
-        telemetry.addLine(String.format("Zero Position: %d", robot.rail.getCurrentPosition()));
-
-        // Initial rail position
-        //  railPos = 0;
     }
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {
-    }
+    public void init_loop() {}
 
     // Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() {
-
-    }
-
-    final double joystickBaseSpeed = 0.3f;
+    public void start() {}
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
@@ -60,46 +59,40 @@ public class TeleopSIGMA extends OpMode {
         double joystickMultiplier = joystickBaseSpeed + (1.0f - gamepad1.right_trigger);
         joystickMultiplier *= invert ? -1.0f : 1.0f;
 
-        // Movement speed for IDCSC (Intelligent Dynamic Cruise Speed Control)
-//        double idcscSpeed = gamepad1.right_trigger;
-
-
         final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
         final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
         final_yaw += (gamepad1.right_stick_x * joystickMultiplier);
 
-//        // D-pad movement
-//        if (gamepad1.dpad_left) {
-//            final_strafe -= idcscSpeed;
-//        }
-//        if (gamepad1.dpad_right) {
-//            final_strafe += idcscSpeed;
-//        }
-//        if (gamepad1.dpad_down) {
-//            final_throttle += idcscSpeed;
-//        }
-//        if (gamepad1.dpad_up) {
-//            final_throttle -= idcscSpeed;
-//        }
-        
         robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
         robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
         robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
 
-        telemetry.addLine(String.format("Right Trigger: %6.2f", gamepad1.right_trigger));
-
-        railPos += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
-
+        railPosition += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
         // Clamps railPos based on max and min values
-        railPos = Math.min(Math.max(railPos, RAIL_MIN), RAIL_MAX);
-//        if (railPos < RAIL_MIN) railPos = RAIL_MIN
-//        else if (railPos > RAIL_MAX) railPos = RAIL_MAX;
+        railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
+        telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
+        robot.rail.setTargetPosition((int) railPosition);
 
-        telemetry.addLine(String.format("Rail Position: %d", robot.rail.getCurrentPosition()));
-        telemetry.addLine(String.format("Target Position: %d", (int) railPos));
+        if (circleWasPressed && !gamepad1.circle) {
+            circleWasPressed = false;
+        } else if (!circleWasPressed && gamepad1.circle) {
+            circleWasPressed = true;
+            clawOpen = !clawOpen;
+            robot.claw.setPosition(clawOpen ? CLAW_OPEN : CLAW_CLOSED);
+        }
 
-        robot.rail.setTargetPosition((int) railPos);
+//        if (gamepad1.dpad_up) armPosition += 0.125;
+//        if (gamepad1.dpad_down) armPosition -= 0.125;
+//        if (gamepad1.dpad_up) clawPosition += 0.01;
+//        if (gamepad1.dpad_down) clawPosition -= 0.01;
+
+        telemetry.addLine(String.format("Target CLAW Position: %f", clawPosition));
+//        robot.claw.setPosition(clawPosition);
+
+        telemetry.addLine(String.format("Current ARM Position: %d", (int) robot.arm.getCurrentPosition()));
+        telemetry.addLine(String.format("Target ARM Position: %d", (int) armPosition));
+        robot.arm.setTargetPosition((int) armPosition);
 
         telemetry.update();
     }
