@@ -3,12 +3,23 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// Super
-// Integrated
-// General
-// Management
-// Algorithm
-
+/*
+ _____ _____ _____ ___  ___  ___  
+/  ___|_   _|  __ \|  \/  | / _ \ 
+\ `--.  | | | |  \/| .  . |/ /_\ \
+ `--. \ | | | | __ | |\/| ||  _  |
+/\__/ /_| |_| |_\ \| |  | || | | |
+\____/ \___/ \____/\_|  |_/\_| |_/
+  u      n      e      a      l
+  p      t      n      n      g
+  e      e      e      a      o
+  r      g      r      g      r
+         r      a      e      i
+         a      l      m      t
+         t             e      h
+         e             n      m
+         d             t
+*/
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
 
@@ -52,6 +63,8 @@ public class TeleopSIGMA extends OpMode {
     @Override
     public void loop() {
         // Final Robot Instructions
+
+        /* WHEELS */
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
@@ -67,6 +80,8 @@ public class TeleopSIGMA extends OpMode {
         robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
         robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
+
+        /* WHEELS DONE*/
 
         railPosition += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
         // Clamps railPos based on max and min values
