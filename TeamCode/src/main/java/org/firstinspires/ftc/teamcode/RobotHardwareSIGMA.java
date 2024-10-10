@@ -50,7 +50,7 @@ public class RobotHardwareSIGMA {
         rail = hwMap.get(DcMotor.class, "railRAIL");
         rail.setDirection(DcMotor.Direction.REVERSE);
         rail.setTargetPosition(0);
-        rail.setPower(0.5);
+        rail.setPower(0.8);
         rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rail.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -60,7 +60,7 @@ public class RobotHardwareSIGMA {
         arm = hwMap.get(DcMotor.class, "armARM");
         arm.setDirection(DcMotor.Direction.REVERSE);
         arm.setTargetPosition(0);
-        arm.setPower(0.8);
+        arm.setPower(0.6);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

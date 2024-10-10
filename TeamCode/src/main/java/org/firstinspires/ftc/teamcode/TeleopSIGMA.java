@@ -40,6 +40,8 @@ public class TeleopSIGMA extends OpMode {
     boolean invert = false;
 
     boolean circleWasPressed = false;
+    boolean triangleWasPressed = false;
+    boolean rightBumperWasPressed = false;
     boolean clawOpen = true;
     double clawPosition = CLAW_OPEN;
 
@@ -53,18 +55,15 @@ public class TeleopSIGMA extends OpMode {
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {}
+    public void init_loop() {
+    }
 
     // Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() {}
+    public void start() {
+    }
 
-    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-    @Override
-    public void loop() {
-        // Final Robot Instructions
-
-        /* WHEELS */
+    public void wheels() {
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
@@ -80,15 +79,44 @@ public class TeleopSIGMA extends OpMode {
         robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
         robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
+    }
 
-        /* WHEELS DONE*/
-
+    public void rail() {
         railPosition += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
-        // Clamps railPos based on max and min values
+        // Clamps rail position based on max and min values
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
         robot.rail.setTargetPosition((int) railPosition);
 
+        if (rightBumperWasPressed && !gamepad1.right_bumper) {
+            rightBumperWasPressed = false;
+        } else if (!rightBumperWasPressed && gamepad1.right_bumper) {
+            rightBumperWasPressed = true;
+            if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
+            else railPosition = RAIL_MIN;
+        }
+    }
+
+    public void arm() {
+        if (triangleWasPressed && !gamepad1.triangle) {
+            triangleWasPressed = false;
+        } else if (!triangleWasPressed && gamepad1.triangle) {
+            triangleWasPressed = true;
+            if (armPosition == 0) armPosition = 673;
+            else armPosition = 0;
+        }
+
+        if (gamepad1.dpad_up) armPosition -= 2.5;
+        if (gamepad1.dpad_down) armPosition += 2.5;
+//        if (gamepad1.dpad_up) clawPosition += 0.01;
+//        if (gamepad1.dpad_down) clawPosition -= 0.01;
+
+        telemetry.addLine(String.format("Current ARM Position: %d", (int) robot.arm.getCurrentPosition()));
+        telemetry.addLine(String.format("Target ARM Position: %d", (int) armPosition));
+        robot.arm.setTargetPosition((int) armPosition);
+    }
+
+    public void claw() {
         if (circleWasPressed && !gamepad1.circle) {
             circleWasPressed = false;
         } else if (!circleWasPressed && gamepad1.circle) {
@@ -97,17 +125,17 @@ public class TeleopSIGMA extends OpMode {
             robot.claw.setPosition(clawOpen ? CLAW_OPEN : CLAW_CLOSED);
         }
 
-//        if (gamepad1.dpad_up) armPosition += 0.125;
-//        if (gamepad1.dpad_down) armPosition -= 0.125;
-//        if (gamepad1.dpad_up) clawPosition += 0.01;
-//        if (gamepad1.dpad_down) clawPosition -= 0.01;
-
         telemetry.addLine(String.format("Target CLAW Position: %f", clawPosition));
 //        robot.claw.setPosition(clawPosition);
+    }
 
-        telemetry.addLine(String.format("Current ARM Position: %d", (int) robot.arm.getCurrentPosition()));
-        telemetry.addLine(String.format("Target ARM Position: %d", (int) armPosition));
-        robot.arm.setTargetPosition((int) armPosition);
+    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+    @Override
+    public void loop() {
+        // Final Robot Instructions
+        wheels();
+        arm();
+        rail();
 
         telemetry.update();
     }
