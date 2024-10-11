@@ -28,7 +28,7 @@ public class TeleopSIGMA extends OpMode {
     static final double CLAW_OPEN = 0.75f;
     static final double CLAW_CLOSED = 0.84f;
     static final double ARM_HIGH = 0.0f;
-    static final double ARM_LOW = 0.0f;
+    static final double ARM_LOW = 673.0f;
     // static final double DEADZONE = 1.1f;
 
     final double joystickBaseSpeed = 0.3f;
@@ -38,10 +38,12 @@ public class TeleopSIGMA extends OpMode {
     double railPosition = 0.0f;
     double armPosition = 0.0f;
     boolean invert = false;
+    boolean slowmode = false;
 
     boolean circleWasPressed = false;
     boolean triangleWasPressed = false;
-    boolean rightBumperWasPressed = false;
+    boolean rightBumperWasPresssed = false;
+    boolean leftBumperWasPressed = false;
     boolean clawOpen = true;
     double clawPosition = CLAW_OPEN;
 
@@ -64,12 +66,21 @@ public class TeleopSIGMA extends OpMode {
     }
 
     public void wheels() {
+
+        if (rightBumperWasPresssed && !gamepad1.right_bumper) {
+            rightBumperWasPresssed = false;
+        } else if (!rightBumperWasPresssed && gamepad1.right_bumper) {
+            rightBumperWasPresssed = true;
+            slowmode = !slowmode;
+        }
+
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
+        double joystickMultiplier = !slowmode ? 1.0f : 0.25f;
 
-        double joystickMultiplier = joystickBaseSpeed + (1.0f - gamepad1.right_trigger);
-        joystickMultiplier *= invert ? -1.0f : 1.0f;
+//        double joystickMultiplier = joystickBaseSpeed + (1.0f - gamepad1.right_trigger);
+//        joystickMultiplier *= invert ? -1.0f : 1.0f;
 
         final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
         final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
@@ -85,16 +96,20 @@ public class TeleopSIGMA extends OpMode {
         railPosition += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
         // Clamps rail position based on max and min values
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
-        telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
-        robot.rail.setTargetPosition((int) railPosition);
 
-        if (rightBumperWasPressed && !gamepad1.right_bumper) {
-            rightBumperWasPressed = false;
-        } else if (!rightBumperWasPressed && gamepad1.right_bumper) {
-            rightBumperWasPressed = true;
+        if (leftBumperWasPressed && !gamepad1.left_bumper) {
+            leftBumperWasPressed = false;
+        } else if (!leftBumperWasPressed && gamepad1.left_bumper) {
+            leftBumperWasPressed = true;
             if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
             else railPosition = RAIL_MIN;
         }
+
+        telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
+        if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.4);
+        else robot.rail.setPower(0.8);
+
+        robot.rail.setTargetPosition((int) railPosition);
     }
 
     public void arm() {
@@ -102,8 +117,8 @@ public class TeleopSIGMA extends OpMode {
             triangleWasPressed = false;
         } else if (!triangleWasPressed && gamepad1.triangle) {
             triangleWasPressed = true;
-            if (armPosition == 0) armPosition = 673;
-            else armPosition = 0;
+            if (armPosition == ARM_LOW) armPosition = ARM_HIGH;
+            else armPosition = ARM_LOW;
         }
 
         if (gamepad1.dpad_up) armPosition -= 2.5;
@@ -136,6 +151,7 @@ public class TeleopSIGMA extends OpMode {
         wheels();
         arm();
         rail();
+        claw();
 
         telemetry.update();
     }
