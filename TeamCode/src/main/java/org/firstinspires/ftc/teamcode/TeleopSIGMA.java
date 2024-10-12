@@ -1,7 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.annotation.SuppressLint;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /*
  _____ _____ _____ ___  ___  ___  
@@ -39,13 +44,38 @@ public class TeleopSIGMA extends OpMode {
     double armPosition = 0.0f;
     boolean invert = false;
     boolean slowmode = false;
-
-    boolean circleWasPressed = false;
-    boolean triangleWasPressed = false;
-    boolean rightBumperWasPresssed = false;
-    boolean leftBumperWasPressed = false;
     boolean clawOpen = true;
     double clawPosition = CLAW_OPEN;
+
+    // Debounce Stuff - by Teo
+    // It would be a good idea to make this a seperate class or something
+    // especially given the entire point of this is because it's supposed
+    // to be better programming practices. But that's boring.
+    private final static int maxButtons = 20;
+    private int buttons = 0;
+    private final BooleanSupplier[] buttonConditions = new BooleanSupplier[maxButtons];
+    private final Boolean[] wasPressed = new Boolean[maxButtons];
+    private final Runnable[] buttonActions = new Runnable[maxButtons];
+
+    private int addButton(BooleanSupplier buttonCondition, Runnable action) {
+        if (buttons >= maxButtons) return 1;
+        buttonConditions[buttons] = buttonCondition;
+        buttonActions[buttons] = action;
+        wasPressed[buttons] = false;
+        buttons++;
+        return 0;
+    }
+
+    private void doButtonPresses() {
+        for (int i = 0; i < buttons; i++) {
+            boolean was = wasPressed[i];
+            boolean is = buttonConditions[i].getAsBoolean();
+            if (!was && is) {
+                buttonActions[i].run();
+            }
+            wasPressed[i] = is;
+        }
+    }
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -53,6 +83,21 @@ public class TeleopSIGMA extends OpMode {
         robot.init(hardwareMap);
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Hello thomas");
+
+        addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
+        addButton(() -> gamepad1.left_bumper, () -> {
+            if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
+            else railPosition = RAIL_MIN;
+        });
+        addButton(() -> gamepad1.triangle,
+                () -> {
+                    if (armPosition == ARM_LOW) armPosition = ARM_HIGH;
+                    else armPosition = ARM_LOW;
+        });
+        addButton(() -> gamepad1.circle, () -> {
+            clawOpen = !clawOpen;
+            robot.claw.setPosition(clawOpen ? CLAW_OPEN : CLAW_CLOSED);
+        });
     }
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -66,13 +111,6 @@ public class TeleopSIGMA extends OpMode {
     }
 
     public void wheels() {
-
-        if (rightBumperWasPresssed && !gamepad1.right_bumper) {
-            rightBumperWasPresssed = false;
-        } else if (!rightBumperWasPresssed && gamepad1.right_bumper) {
-            rightBumperWasPresssed = true;
-            slowmode = !slowmode;
-        }
 
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
@@ -92,18 +130,11 @@ public class TeleopSIGMA extends OpMode {
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
     }
 
+    @SuppressLint("DefaultLocale")
     public void rail() {
         railPosition += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
         // Clamps rail position based on max and min values
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
-
-        if (leftBumperWasPressed && !gamepad1.left_bumper) {
-            leftBumperWasPressed = false;
-        } else if (!leftBumperWasPressed && gamepad1.left_bumper) {
-            leftBumperWasPressed = true;
-            if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
-            else railPosition = RAIL_MIN;
-        }
 
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
         if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.4);
@@ -112,14 +143,8 @@ public class TeleopSIGMA extends OpMode {
         robot.rail.setTargetPosition((int) railPosition);
     }
 
+    @SuppressLint("DefaultLocale")
     public void arm() {
-        if (triangleWasPressed && !gamepad1.triangle) {
-            triangleWasPressed = false;
-        } else if (!triangleWasPressed && gamepad1.triangle) {
-            triangleWasPressed = true;
-            if (armPosition == ARM_LOW) armPosition = ARM_HIGH;
-            else armPosition = ARM_LOW;
-        }
 
         if (gamepad1.dpad_up) armPosition -= 2.5;
         if (gamepad1.dpad_down) armPosition += 2.5;
@@ -131,14 +156,8 @@ public class TeleopSIGMA extends OpMode {
         robot.arm.setTargetPosition((int) armPosition);
     }
 
+    @SuppressLint("DefaultLocale")
     public void claw() {
-        if (circleWasPressed && !gamepad1.circle) {
-            circleWasPressed = false;
-        } else if (!circleWasPressed && gamepad1.circle) {
-            circleWasPressed = true;
-            clawOpen = !clawOpen;
-            robot.claw.setPosition(clawOpen ? CLAW_OPEN : CLAW_CLOSED);
-        }
 
         telemetry.addLine(String.format("Target CLAW Position: %f", clawPosition));
 //        robot.claw.setPosition(clawPosition);
@@ -152,6 +171,8 @@ public class TeleopSIGMA extends OpMode {
         arm();
         rail();
         claw();
+
+        doButtonPresses();
 
         telemetry.update();
     }
