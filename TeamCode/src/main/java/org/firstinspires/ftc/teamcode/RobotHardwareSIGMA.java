@@ -47,7 +47,7 @@ public class RobotHardwareSIGMA {
         rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Initialize linear rail motor to run with encoder
-        rail = hwMap.get(DcMotor.class, "railRAIL");
+        rail = hwMap.get(DcMotor.class, "rail");
         rail.setDirection(DcMotor.Direction.REVERSE);
         rail.setTargetPosition(0);
         rail.setPower(0.8);
@@ -57,16 +57,16 @@ public class RobotHardwareSIGMA {
         rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Initialize arm motor to run with encoder
-        arm = hwMap.get(DcMotor.class, "armARM");
-        arm.setDirection(DcMotor.Direction.REVERSE);
+        arm = hwMap.get(DcMotor.class, "arm");
+        arm.setDirection(DcMotor.Direction.FORWARD);
         arm.setTargetPosition(0);
-        arm.setPower(0.6);
+        arm.setPower(0.85);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Initialize claw servos
-        claw = hwMap.get(Servo.class, "clawCLAW");
+        claw = hwMap.get(Servo.class, "claw");
     }
 }

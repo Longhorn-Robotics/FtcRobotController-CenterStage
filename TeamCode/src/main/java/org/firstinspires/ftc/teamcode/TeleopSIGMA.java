@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /*
@@ -32,8 +31,8 @@ public class TeleopSIGMA extends OpMode {
     static final double RAIL_MAX = 3000.0f;
     static final double CLAW_OPEN = 0.75f;
     static final double CLAW_CLOSED = 0.84f;
-    static final double ARM_HIGH = 0.0f;
-    static final double ARM_LOW = 673.0f;
+    static final double ARM_DOWN = 0.0f;
+    static final double ARM_UP = 673.0f;
     // static final double DEADZONE = 1.1f;
 
     final double joystickBaseSpeed = 0.3f;
@@ -57,13 +56,12 @@ public class TeleopSIGMA extends OpMode {
     private final Boolean[] wasPressed = new Boolean[maxButtons];
     private final Runnable[] buttonActions = new Runnable[maxButtons];
 
-    private int addButton(BooleanSupplier buttonCondition, Runnable action) {
-        if (buttons >= maxButtons) return 1;
+    private void addButton(BooleanSupplier buttonCondition, Runnable action) {
+        if (buttons >= maxButtons) return;
         buttonConditions[buttons] = buttonCondition;
         buttonActions[buttons] = action;
         wasPressed[buttons] = false;
         buttons++;
-        return 0;
     }
 
     private void doButtonPresses() {
@@ -91,8 +89,8 @@ public class TeleopSIGMA extends OpMode {
         });
         addButton(() -> gamepad1.triangle,
                 () -> {
-                    if (armPosition == ARM_LOW) armPosition = ARM_HIGH;
-                    else armPosition = ARM_LOW;
+                    if (armPosition == ARM_UP) armPosition = ARM_DOWN;
+                    else armPosition = ARM_UP;
         });
         addButton(() -> gamepad1.circle, () -> {
             clawOpen = !clawOpen;
@@ -150,6 +148,8 @@ public class TeleopSIGMA extends OpMode {
         if (gamepad1.dpad_down) armPosition += 2.5;
 //        if (gamepad1.dpad_up) clawPosition += 0.01;
 //        if (gamepad1.dpad_down) clawPosition -= 0.01;
+
+        armPosition = Math.min(Math.max(armPosition, ARM_DOWN), ARM_UP);
 
         telemetry.addLine(String.format("Current ARM Position: %d", (int) robot.arm.getCurrentPosition()));
         telemetry.addLine(String.format("Target ARM Position: %d", (int) armPosition));
