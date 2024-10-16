@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
+// import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareSIGMA {
     HardwareMap hwMap;
@@ -12,11 +11,12 @@ public class RobotHardwareSIGMA {
     public DcMotor lfDrive;
     public DcMotor rbDrive;
     public DcMotor rfDrive;
+    public DcMotor hangDrive;
     public DcMotor rail;
     public DcMotor arm;
     public Servo claw;
 
-    private ElapsedTime period = new ElapsedTime();
+//    private ElapsedTime period = new ElapsedTime();
 
     public RobotHardwareSIGMA() {}
 
@@ -45,6 +45,12 @@ public class RobotHardwareSIGMA {
         lbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        hangDrive = hwMap.get(DcMotor.class, "hanging");
+        hangDrive.setDirection(DcMotor.Direction.FORWARD);
+        hangDrive.setPower(0);
+        hangDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        hangDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Initialize linear rail motor to run with encoder
         rail = hwMap.get(DcMotor.class, "rail");

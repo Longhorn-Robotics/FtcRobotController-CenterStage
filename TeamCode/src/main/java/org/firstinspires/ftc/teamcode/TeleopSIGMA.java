@@ -33,21 +33,19 @@ public class TeleopSIGMA extends OpMode {
     static final double CLAW_CLOSED = 0.84f;
     static final double ARM_DOWN = 0.0f;
     static final double ARM_UP = 673.0f;
-    // static final double DEADZONE = 1.1f;
 
-    final double joystickBaseSpeed = 0.3f;
+    final double hangingMotorSpeed = 2.0f;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
     double railPosition = 0.0f;
     double armPosition = 0.0f;
-    boolean invert = false;
     boolean slowmode = false;
     boolean clawOpen = true;
     double clawPosition = CLAW_OPEN;
 
     // Debounce Stuff - by Teo
-    // It would be a good idea to make this a seperate class or something
+    // It would be a good idea to make this a separate class or something
     // especially given the entire point of this is because it's supposed
     // to be better programming practices. But that's boring.
     private final static int maxButtons = 20;
@@ -83,16 +81,16 @@ public class TeleopSIGMA extends OpMode {
         telemetry.addData("Say", "Hello thomas");
 
         addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
-        addButton(() -> gamepad1.left_bumper, () -> {
+        addButton(() -> gamepad2.left_bumper, () -> {
             if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
             else railPosition = RAIL_MIN;
         });
-        addButton(() -> gamepad1.triangle,
+        addButton(() -> gamepad2.triangle,
                 () -> {
                     if (armPosition == ARM_UP) armPosition = ARM_DOWN;
                     else armPosition = ARM_UP;
         });
-        addButton(() -> gamepad1.circle, () -> {
+        addButton(() -> gamepad2.circle, () -> {
             clawOpen = !clawOpen;
             robot.claw.setPosition(clawOpen ? CLAW_OPEN : CLAW_CLOSED);
         });
@@ -115,8 +113,6 @@ public class TeleopSIGMA extends OpMode {
         double final_yaw = 0.0f;
         double joystickMultiplier = !slowmode ? 1.0f : 0.25f;
 
-//        double joystickMultiplier = joystickBaseSpeed + (1.0f - gamepad1.right_trigger);
-//        joystickMultiplier *= invert ? -1.0f : 1.0f;
 
         final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
         final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
@@ -128,9 +124,16 @@ public class TeleopSIGMA extends OpMode {
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
     }
 
+    public void hanging() {
+
+        double input_power = (gamepad1.dpad_up ? 1.0 : 0.0) - (gamepad1.dpad_down ? 1.0 : 0.0);
+
+        robot.hangDrive.setPower(input_power * hangingMotorSpeed);
+    }
+
     @SuppressLint("DefaultLocale")
     public void rail() {
-        railPosition += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
+        railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
         // Clamps rail position based on max and min values
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
 
@@ -144,14 +147,12 @@ public class TeleopSIGMA extends OpMode {
     @SuppressLint("DefaultLocale")
     public void arm() {
 
-        if (gamepad1.dpad_up) armPosition -= 2.5;
-        if (gamepad1.dpad_down) armPosition += 2.5;
-//        if (gamepad1.dpad_up) clawPosition += 0.01;
-//        if (gamepad1.dpad_down) clawPosition -= 0.01;
+        if (gamepad2.dpad_up) armPosition -= 2.5;
+        if (gamepad2.dpad_down) armPosition += 2.5;
 
         armPosition = Math.min(Math.max(armPosition, ARM_DOWN), ARM_UP);
 
-        telemetry.addLine(String.format("Current ARM Position: %d", (int) robot.arm.getCurrentPosition()));
+        telemetry.addLine(String.format("Current ARM Position: %d", robot.arm.getCurrentPosition()));
         telemetry.addLine(String.format("Target ARM Position: %d", (int) armPosition));
         robot.arm.setTargetPosition((int) armPosition);
     }
@@ -171,6 +172,7 @@ public class TeleopSIGMA extends OpMode {
         arm();
         rail();
         claw();
+        hanging();
 
         doButtonPresses();
 
