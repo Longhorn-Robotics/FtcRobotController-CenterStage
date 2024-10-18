@@ -27,11 +27,11 @@ import java.util.function.BooleanSupplier;
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
 
-    static final double RAIL_MIN = 0.0f;
+    static final double RAIL_MIN = 10.0f;
     static final double RAIL_MAX = 3000.0f;
-    static final double CLAW_OPEN = 0.75f;
-    static final double CLAW_CLOSED = 0.84f;
-    static final double ARM_DOWN = 0.0f;
+    static final double CLAW_OPEN = 0.0f;
+    static final double CLAW_CLOSED = 0.75f;
+    static final double ARM_DOWN = 5.0f;
     static final double ARM_UP = 673.0f;
 
     final double hangingMotorSpeed = 2.0f;
@@ -138,7 +138,7 @@ public class TeleopSIGMA extends OpMode {
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
 
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
-        if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.4);
+        if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.2);
         else robot.rail.setPower(0.8);
 
         robot.rail.setTargetPosition((int) railPosition);
@@ -162,6 +162,8 @@ public class TeleopSIGMA extends OpMode {
 
         telemetry.addLine(String.format("Target CLAW Position: %f", clawPosition));
 //        robot.claw.setPosition(clawPosition);
+        telemetry.addLine(String.format("Current CLAW Position: %f", robot.claw.getPosition()));
+
     }
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
