@@ -52,13 +52,14 @@ public class TeleopLite extends OpMode {
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
 
         telemetry.addLine(String.format("Right Trigger: %6.2f", gamepad1.right_trigger));
+        telemetry.addLine(String.format("Rail Position: %d", robot.rail.getCurrentPosition()));
 
         railPos += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
 
         if (railPos < RAIL_MIN) railPos = RAIL_MIN;
         else if (railPos > RAIL_MAX) railPos = RAIL_MAX;
 
-        robot.rail.setTargetPosition((int) railPos);
+//        robot.rail.setTargetPosition((int) railPos);
 
         telemetry.update();
     }

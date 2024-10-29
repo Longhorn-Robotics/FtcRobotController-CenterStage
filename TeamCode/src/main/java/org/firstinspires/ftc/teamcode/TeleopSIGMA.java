@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.function.BooleanSupplier;
 
@@ -80,6 +81,10 @@ public class TeleopSIGMA extends OpMode {
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Hello thomas");
 
+        robot.rail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.rail.setTargetPosition((int) RAIL_MIN);
+
         addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
         addButton(() -> gamepad2.left_bumper, () -> {
             if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
@@ -126,9 +131,9 @@ public class TeleopSIGMA extends OpMode {
 
     public void hanging() {
 
-        double input_power = (gamepad1.dpad_up ? 1.0 : 0.0) - (gamepad1.dpad_down ? 1.0 : 0.0);
+        double input_power = (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
 
-        robot.hangDrive.setPower(input_power * hangingMotorSpeed);
+        robot.hangDrive.setPower(input_power);
     }
 
     @SuppressLint("DefaultLocale")
@@ -138,7 +143,7 @@ public class TeleopSIGMA extends OpMode {
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
 
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
-        if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.2);
+        if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.4);
         else robot.rail.setPower(0.8);
 
         robot.rail.setTargetPosition((int) railPosition);
