@@ -131,7 +131,7 @@ public class TeleopSIGMA extends OpMode {
 
     public void hanging() {
 
-        double input_power = (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
+        double input_power = (gamepad1.dpad_up ? 1.0f : (gamepad1.dpad_down ? -1.0f : 0.0f)) * 20.0f;
 
         robot.hangDrive.setPower(input_power);
     }
