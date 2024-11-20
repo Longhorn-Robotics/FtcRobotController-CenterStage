@@ -11,10 +11,11 @@ public class RobotHardwareSIGMA {
     public DcMotor lfDrive;
     public DcMotor rbDrive;
     public DcMotor rfDrive;
-    public DcMotor hangDrive;
-    public DcMotor rail;
-    public DcMotor arm;
-    public Servo claw;
+    public DcMotor bucketRail;
+    public Servo bucket;
+    public Servo clawExtend;
+    public Servo clawPivot;
+    public Servo clawPinch;
 
 //    private ElapsedTime period = new ElapsedTime();
 
@@ -46,33 +47,22 @@ public class RobotHardwareSIGMA {
         rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        hangDrive = hwMap.get(DcMotor.class, "hangHANG");
-        hangDrive.setDirection(DcMotor.Direction.FORWARD);
-        hangDrive.setPower(0);
-        hangDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        hangDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         // Initialize linear rail motor to run with encoder
-        rail = hwMap.get(DcMotor.class, "railRAIL");
-        rail.setDirection(DcMotor.Direction.REVERSE);
-        rail.setTargetPosition(0);
-        rail.setPower(0.8);
-        rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rail.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bucketRail = hwMap.get(DcMotor.class, "railRAIL");
+        bucketRail.setDirection(DcMotor.Direction.REVERSE);
+        bucketRail.setTargetPosition(0);
+        bucketRail.setPower(0.8);
+        bucketRail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bucketRail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bucketRail.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bucketRail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // Initialize arm motor to run with encoder
-        arm = hwMap.get(DcMotor.class, "armARM");
-        arm.setDirection(DcMotor.Direction.FORWARD);
-        arm.setTargetPosition(0);
-        arm.setPower(0.85);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+//        bucket = hwMap.get(Servo.class, "bucketServo");
 
         // Initialize claw servos
-        claw = hwMap.get(Servo.class, "clawCLAW");
+        clawExtend = hwMap.get(Servo.class, "extendEXTEND");
+        clawPivot = hwMap.get(Servo.class, "pivotPIVOT");
+        clawPinch = hwMap.get(Servo.class, "pinchPINCH");
     }
 }

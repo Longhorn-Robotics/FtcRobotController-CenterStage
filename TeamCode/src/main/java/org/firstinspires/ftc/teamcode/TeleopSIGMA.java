@@ -30,20 +30,22 @@ public class TeleopSIGMA extends OpMode {
 
     static final double RAIL_MIN = 10.0f;
     static final double RAIL_MAX = 3000.0f;
-    static final double CLAW_OPEN = 0.0f;
-    static final double CLAW_CLOSED = 0.75f;
-    static final double ARM_DOWN = 5.0f;
-    static final double ARM_UP = 673.0f;
-
-    final double hangingMotorSpeed = 2.0f;
+    static final double PINCH_OPEN = 0.3f;
+    static final double PINCH_CLOSED = 0.42f;
+    static final double EXTEND_IN = 0.52f;
+    static final double EXTEND_OUT = 0.91f;
+    static final double PIVOT_DOWN = 0.04f;
+    static final double PIVOT_FLOAT = 0.20f;
+    static final double PIVOT_BACK = 0.90f;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
     double railPosition = 0.0f;
-    double armPosition = 0.0f;
+    double extendPosition = 0.0f;
     boolean slowmode = false;
     boolean clawOpen = true;
-    double clawPosition = CLAW_OPEN;
+    double pinchPosition = PINCH_OPEN;
+    int pivotState = 0;
 
     // Debounce Stuff - by Teo
     // It would be a good idea to make this a separate class or something
@@ -81,23 +83,29 @@ public class TeleopSIGMA extends OpMode {
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Hello thomas");
 
-        robot.rail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.rail.setTargetPosition((int) RAIL_MIN);
+        robot.bucketRail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.bucketRail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.bucketRail.setTargetPosition((int) RAIL_MIN);
 
         addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
-        addButton(() -> gamepad2.left_bumper, () -> {
-            if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
-            else railPosition = RAIL_MIN;
-        });
+//        addButton(() -> gamepad2.left_bumper, () -> {
+//            if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
+//            else railPosition = RAIL_MIN;
+//        });
         addButton(() -> gamepad2.triangle,
                 () -> {
-                    if (armPosition == ARM_UP) armPosition = ARM_DOWN;
-                    else armPosition = ARM_UP;
+                    if (extendPosition == EXTEND_IN) extendPosition = EXTEND_OUT;
+                    else extendPosition = EXTEND_IN;
         });
         addButton(() -> gamepad2.circle, () -> {
             clawOpen = !clawOpen;
-            robot.claw.setPosition(clawOpen ? CLAW_OPEN : CLAW_CLOSED);
+            robot.clawPinch.setPosition(clawOpen ? PINCH_CLOSED : PINCH_OPEN);
+        });
+        addButton(() -> gamepad2.dpad_left, () -> {
+            if (pivotState < 2) pivotState++;
+        });
+        addButton(() -> gamepad2.dpad_right, () -> {
+            if (pivotState >0) pivotState--;
         });
     }
 
@@ -129,13 +137,6 @@ public class TeleopSIGMA extends OpMode {
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
     }
 
-    public void hanging() {
-
-        double input_power = (gamepad1.dpad_up ? 1.0f : (gamepad1.dpad_down ? -1.0f : 0.0f)) * 20.0f;
-
-        robot.hangDrive.setPower(input_power);
-    }
-
     @SuppressLint("DefaultLocale")
     public void rail() {
         railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
@@ -143,45 +144,61 @@ public class TeleopSIGMA extends OpMode {
         railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
 
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
-        if (robot.rail.getCurrentPosition() > railPosition) robot.rail.setPower(0.4);
-        else robot.rail.setPower(0.8);
+        if (robot.bucketRail.getCurrentPosition() > railPosition) robot.bucketRail.setPower(0.4);
+        else robot.bucketRail.setPower(0.8);
 
-        robot.rail.setTargetPosition((int) railPosition);
+        robot.bucketRail.setTargetPosition((int) railPosition);
     }
 
     @SuppressLint("DefaultLocale")
-    public void arm() {
-
-        if (gamepad2.dpad_up) armPosition -= 2.5;
-        if (gamepad2.dpad_down) armPosition += 2.5;
-
-        armPosition = Math.min(Math.max(armPosition, ARM_DOWN), ARM_UP);
-
-        telemetry.addLine(String.format("Current ARM Position: %d", robot.arm.getCurrentPosition()));
-        telemetry.addLine(String.format("Target ARM Position: %d", (int) armPosition));
-        robot.arm.setTargetPosition((int) armPosition);
+    public void pinch() {
+        telemetry.addLine(String.format("Target CLAW Position: %f", pinchPosition));
+//        robot.clawPinch.setPosition(pinchPosition);
+        telemetry.addLine(String.format("Current CLAW Position: %f", robot.clawPinch.getPosition()));
     }
 
     @SuppressLint("DefaultLocale")
-    public void claw() {
+    public void extend() {
+//
+        if (gamepad2.dpad_up) extendPosition -= 2.5;
+        if (gamepad2.dpad_down) extendPosition += 2.5;
 
-        telemetry.addLine(String.format("Target CLAW Position: %f", clawPosition));
-//        robot.claw.setPosition(clawPosition);
-        telemetry.addLine(String.format("Current CLAW Position: %f", robot.claw.getPosition()));
+        extendPosition = Math.min(Math.max(extendPosition, EXTEND_IN), EXTEND_OUT);
 
+        telemetry.addLine(String.format("Target EXTEND Position: %f", extendPosition));
+        robot.clawExtend.setPosition(extendPosition);
+        telemetry.addLine(String.format("Current EXTEND Position: %f", robot.clawExtend.getPosition()));
     }
+
+    @SuppressLint("DefaultLocale")
+    public void pivot() {
+        switch (pivotState) {
+            case 0:
+                robot.clawPivot.setPosition(PIVOT_BACK);
+                break;
+            case 1:
+                robot.clawExtend.setPosition(PIVOT_FLOAT);
+                break;
+            case 2:
+                robot.clawExtend.setPosition(PIVOT_DOWN);
+                break;
+        }
+    }
+
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-        // Final Robot Instructions
-        wheels();
-        arm();
-        rail();
-        claw();
-        hanging();
 
         doButtonPresses();
+
+        // Final Robot Instructions
+        wheels();
+        rail();
+//        dump();
+        extend();
+        pinch();
+        pivot();
 
         telemetry.update();
     }
