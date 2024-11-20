@@ -177,10 +177,10 @@ public class TeleopSIGMA extends OpMode {
                 robot.clawPivot.setPosition(PIVOT_BACK);
                 break;
             case 1:
-                robot.clawExtend.setPosition(PIVOT_FLOAT);
+                robot.clawPivot.setPosition(PIVOT_FLOAT);
                 break;
             case 2:
-                robot.clawExtend.setPosition(PIVOT_DOWN);
+                robot.clawPivot.setPosition(PIVOT_DOWN);
                 break;
         }
     }
