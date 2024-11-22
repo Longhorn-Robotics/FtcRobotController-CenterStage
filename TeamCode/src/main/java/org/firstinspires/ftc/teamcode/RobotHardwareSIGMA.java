@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import java.util.function.Consumer;
 // import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareSIGMA {
@@ -11,11 +13,36 @@ public class RobotHardwareSIGMA {
     public DcMotor lfDrive;
     public DcMotor rbDrive;
     public DcMotor rfDrive;
-    public DcMotor bucketRail;
+    public DcMotor bucketRail1;
+    public DcMotor bucketRail2;
     public Servo bucket;
     public Servo clawExtend;
     public Servo clawPivot;
     public Servo clawPinch;
+
+    // Note: Maybe pull this outside?
+    static class DualMotor {
+        DcMotor motor1;
+        DcMotor motor2;
+        public DualMotor(DcMotor _motor1, DcMotor _motor2) {
+            motor1 = _motor1;
+            motor2 = _motor2;
+        }
+
+        public void setTargetPosition(int target) {
+            apply((DcMotor a) -> a.setTargetPosition(target));
+        }
+        public void setMode(DcMotor.RunMode mode) {
+            apply((DcMotor a) -> a.setMode(mode));
+        }
+
+        public void apply(Consumer<DcMotor> function) {
+            function.accept(motor1);
+            function.accept(motor2);
+        }
+    }
+
+    DualMotor railMotors;
 
 //    private ElapsedTime period = new ElapsedTime();
 
@@ -48,14 +75,20 @@ public class RobotHardwareSIGMA {
         rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Initialize linear rail motor to run with encoder
-        bucketRail = hwMap.get(DcMotor.class, "railRAIL");
-        bucketRail.setDirection(DcMotor.Direction.REVERSE);
-        bucketRail.setTargetPosition(0);
-        bucketRail.setPower(0.8);
-        bucketRail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        bucketRail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bucketRail.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        bucketRail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bucketRail1 = hwMap.get(DcMotor.class, "railRAIL");
+        bucketRail2 = hwMap.get(DcMotor.class, "railRAIL");
+
+        railMotors = new DualMotor(bucketRail1, bucketRail2);
+
+        railMotors.apply((DcMotor motor) -> {
+            motor.setDirection(DcMotor.Direction.REVERSE);
+            motor.setTargetPosition(0);
+            motor.setPower(0.8);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        });
 
 
 //        bucket = hwMap.get(Servo.class, "bucketServo");

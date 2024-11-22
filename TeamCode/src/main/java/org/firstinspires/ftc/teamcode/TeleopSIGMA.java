@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import java.util.function.BooleanSupplier;
-
 /*
  _____ _____ _____ ___  ___  ___  
 /  ___|_   _|  __ \|  \/  | / _ \ 
@@ -51,30 +49,36 @@ public class TeleopSIGMA extends OpMode {
     // It would be a good idea to make this a separate class or something
     // especially given the entire point of this is because it's supposed
     // to be better programming practices. But that's boring.
-    private final static int maxButtons = 20;
-    private int buttons = 0;
-    private final BooleanSupplier[] buttonConditions = new BooleanSupplier[maxButtons];
-    private final Boolean[] wasPressed = new Boolean[maxButtons];
-    private final Runnable[] buttonActions = new Runnable[maxButtons];
+    // TODO: Find better acronyms
+    private final ButtonAction[] buttonActions = {
+            new ButtonAction(() -> gamepad1.right_bumper, () -> slowmode = !slowmode),
+            new ButtonAction(() -> gamepad2.triangle, () -> {
+                if (extendPosition == EXTEND_IN) extendPosition = EXTEND_OUT;
+                else extendPosition = EXTEND_IN;
+            }),
+            new ButtonAction(() -> gamepad2.left_bumper, () -> {
+                if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
+                else railPosition = RAIL_MIN;
+            }),
+            new ButtonAction(() -> gamepad2.circle, () -> {
+                clawOpen = !clawOpen;
+                robot.clawPinch.setPosition(clawOpen ? PINCH_CLOSED : PINCH_OPEN);
+            }),
+            new ButtonAction(() -> gamepad2.dpad_left, () -> pivotState++),
+            new ButtonAction(() -> gamepad2.dpad_right, () -> pivotState--)
+    };
 
-    private void addButton(BooleanSupplier buttonCondition, Runnable action) {
-        if (buttons >= maxButtons) return;
-        buttonConditions[buttons] = buttonCondition;
-        buttonActions[buttons] = action;
-        wasPressed[buttons] = false;
-        buttons++;
-    }
+    // Another cool functional programming interface
+    // This time for the common pattern of targeted motors
 
-    private void doButtonPresses() {
-        for (int i = 0; i < buttons; i++) {
-            boolean was = wasPressed[i];
-            boolean is = buttonConditions[i].getAsBoolean();
-            if (!was && is) {
-                buttonActions[i].run();
-            }
-            wasPressed[i] = is;
-        }
-    }
+    @SuppressLint("DefaultLocale")
+    private final TargetedMotor[] targetedMotors = {
+            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> robot.railMotors.apply(motor -> {motor.setTargetPosition((int) railPosition);
+                    telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
+                    if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
+                    else motor.setPower(0.8);})),
+            new TargetedMotor(EXTEND_IN, EXTEND_OUT, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
+    };
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -83,30 +87,11 @@ public class TeleopSIGMA extends OpMode {
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Hello thomas");
 
-        robot.bucketRail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.bucketRail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.bucketRail.setTargetPosition((int) RAIL_MIN);
-
-        addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
-//        addButton(() -> gamepad2.left_bumper, () -> {
-//            if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
-//            else railPosition = RAIL_MIN;
-//        });
-        addButton(() -> gamepad2.triangle,
-                () -> {
-                    if (extendPosition == EXTEND_IN) extendPosition = EXTEND_OUT;
-                    else extendPosition = EXTEND_IN;
-        });
-        addButton(() -> gamepad2.circle, () -> {
-            clawOpen = !clawOpen;
-            robot.clawPinch.setPosition(clawOpen ? PINCH_CLOSED : PINCH_OPEN);
-        });
-        addButton(() -> gamepad2.dpad_left, () -> {
-            if (pivotState < 2) pivotState++;
-        });
-        addButton(() -> gamepad2.dpad_right, () -> {
-            if (pivotState >0) pivotState--;
-        });
+        robot.railMotors.apply((dcMotor -> {
+            dcMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            dcMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            dcMotor.setTargetPosition((int) RAIL_MIN);
+        }));
     }
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -140,14 +125,7 @@ public class TeleopSIGMA extends OpMode {
     @SuppressLint("DefaultLocale")
     public void rail() {
         railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
-        // Clamps rail position based on max and min values
-        railPosition = Math.min(Math.max(railPosition, RAIL_MIN), RAIL_MAX);
-
-        telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
-        if (robot.bucketRail.getCurrentPosition() > railPosition) robot.bucketRail.setPower(0.4);
-        else robot.bucketRail.setPower(0.8);
-
-        robot.bucketRail.setTargetPosition((int) railPosition);
+        // Handled by targetedMotors
     }
 
     @SuppressLint("DefaultLocale")
@@ -163,26 +141,20 @@ public class TeleopSIGMA extends OpMode {
         if (gamepad2.dpad_up) extendPosition -= 2.5;
         if (gamepad2.dpad_down) extendPosition += 2.5;
 
+
         extendPosition = Math.min(Math.max(extendPosition, EXTEND_IN), EXTEND_OUT);
+        robot.clawExtend.setPosition(extendPosition);
 
         telemetry.addLine(String.format("Target EXTEND Position: %f", extendPosition));
-        robot.clawExtend.setPosition(extendPosition);
         telemetry.addLine(String.format("Current EXTEND Position: %f", robot.clawExtend.getPosition()));
     }
 
     @SuppressLint("DefaultLocale")
     public void pivot() {
-        switch (pivotState) {
-            case 0:
-                robot.clawPivot.setPosition(PIVOT_BACK);
-                break;
-            case 1:
-                robot.clawPivot.setPosition(PIVOT_FLOAT);
-                break;
-            case 2:
-                robot.clawPivot.setPosition(PIVOT_DOWN);
-                break;
-        }
+
+        pivotState = Math.min(Math.max(pivotState, 0), 1);
+
+        robot.clawPivot.setPosition(new double[]{PIVOT_BACK, PIVOT_DOWN, PIVOT_FLOAT}[pivotState]);
     }
 
 
@@ -190,7 +162,8 @@ public class TeleopSIGMA extends OpMode {
     @Override
     public void loop() {
 
-        doButtonPresses();
+        ButtonAction.doActions(buttonActions);
+        TargetedMotor.runArray(targetedMotors);
 
         // Final Robot Instructions
         wheels();
