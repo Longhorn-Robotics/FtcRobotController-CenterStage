@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import java.util.function.Consumer;
 // import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareSIGMA {
@@ -12,10 +14,36 @@ public class RobotHardwareSIGMA {
     public DcMotor lfDrive;
     public DcMotor rbDrive;
     public DcMotor rfDrive;
-    public DcMotor hangDrive;
-    public DcMotor rail;
-    public DcMotor arm;
-    public Servo claw;
+    public DcMotor bucketRail1;
+    public DcMotor bucketRail2;
+    public Servo bucket;
+    public Servo clawExtend;
+    public Servo clawPivot;
+    public Servo clawPinch;
+
+    // Note: Maybe pull this outside?
+    static class DualMotor {
+        DcMotor motor1;
+        DcMotor motor2;
+        public DualMotor(DcMotor _motor1, DcMotor _motor2) {
+            motor1 = _motor1;
+            motor2 = _motor2;
+        }
+
+        public void setTargetPosition(int target) {
+            apply((DcMotor a) -> a.setTargetPosition(target));
+        }
+        public void setMode(DcMotor.RunMode mode) {
+            apply((DcMotor a) -> a.setMode(mode));
+        }
+
+        public void apply(Consumer<DcMotor> function) {
+            function.accept(motor1);
+            function.accept(motor2);
+        }
+    }
+
+    DualMotor railMotors;
 
 //    private ElapsedTime period = new ElapsedTime();
 
@@ -47,33 +75,28 @@ public class RobotHardwareSIGMA {
         rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        hangDrive = hwMap.get(DcMotor.class, "hangHANG");
-        hangDrive.setDirection(DcMotor.Direction.FORWARD);
-        hangDrive.setPower(0);
-        hangDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        hangDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         // Initialize linear rail motor to run with encoder
-        rail = hwMap.get(DcMotor.class, "railRAIL");
-        rail.setDirection(DcMotor.Direction.REVERSE);
-        rail.setTargetPosition(0);
-        rail.setPower(0.8);
-        rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rail.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rail.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bucketRail1 = hwMap.get(DcMotor.class, "railRAIL");
+        bucketRail2 = hwMap.get(DcMotor.class, "railRAIL");
 
-        // Initialize arm motor to run with encoder
-        arm = hwMap.get(DcMotor.class, "armARM");
-        arm.setDirection(DcMotor.Direction.FORWARD);
-        arm.setTargetPosition(0);
-        arm.setPower(0.85);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        railMotors = new DualMotor(bucketRail1, bucketRail2);
+
+        railMotors.apply((DcMotor motor) -> {
+            motor.setDirection(DcMotor.Direction.REVERSE);
+            motor.setTargetPosition(0);
+            motor.setPower(0.8);
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        });
+
+
+//        bucket = hwMap.get(Servo.class, "bucketServo");
 
         // Initialize claw servos
-        claw = hwMap.get(Servo.class, "clawCLAW");
+        clawExtend = hwMap.get(Servo.class, "extendEXTEND");
+        clawPivot = hwMap.get(Servo.class, "pivotPIVOT");
+        clawPinch = hwMap.get(Servo.class, "pinchPINCH");
     }
 }
