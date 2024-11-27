@@ -85,7 +85,7 @@ public class TeleopSIGMA extends OpMode {
         robot.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.rail.setTargetPosition((int) RAIL_MIN);
 
-        addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
+//        addButton(() -> gamepad1.right_bumper, () -> slowmode = !slowmode);
         addButton(() -> gamepad2.left_bumper, () -> {
             if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
             else railPosition = RAIL_MIN;
@@ -116,12 +116,12 @@ public class TeleopSIGMA extends OpMode {
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
-        double joystickMultiplier = !slowmode ? 1.0f : 0.25f;
+        double joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.25f;
 
 
-        final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
-        final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
-        final_yaw += (gamepad1.right_stick_x * joystickMultiplier);
+        final_throttle += (gamepad1.left_stick_y * joystickMultiplier) + (gamepad2.left_stick_y * 0.2);
+        final_strafe += (gamepad1.left_stick_x * joystickMultiplier) + (gamepad2.left_stick_x * 0.2);
+        final_yaw += (gamepad1.right_stick_x * joystickMultiplier) + (gamepad2.right_stick_x * 0.2);
 
         robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
         robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
@@ -179,7 +179,7 @@ public class TeleopSIGMA extends OpMode {
         arm();
         rail();
         claw();
-        hanging();
+//        hanging();
 
         doButtonPresses();
 

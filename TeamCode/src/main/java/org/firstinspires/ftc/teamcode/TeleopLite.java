@@ -40,7 +40,8 @@ public class TeleopLite extends OpMode {
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
 
-        double joystickMultiplier = joystickBaseSpeed + (1.0f - gamepad1.right_trigger);
+//        double joystickMultiplier = joystickBaseSpeed + (1.0f - gamepad1.right_trigger);
+        double joystickMultiplier = joystickBaseSpeed;
 
         final_throttle += (gamepad1.left_stick_y * joystickMultiplier);
         final_strafe += (gamepad1.left_stick_x * joystickMultiplier);
@@ -52,14 +53,15 @@ public class TeleopLite extends OpMode {
         robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
 
         telemetry.addLine(String.format("Right Trigger: %6.2f", gamepad1.right_trigger));
+        telemetry.addLine(String.format("Target Position: %6.2f", railPos));
         telemetry.addLine(String.format("Rail Position: %d", robot.rail.getCurrentPosition()));
 
-        railPos += (gamepad1.right_trigger - gamepad1.left_trigger) * 20.0f;
+        railPos += (gamepad1.right_trigger - gamepad1.left_trigger) * 10.0f;
 
         if (railPos < RAIL_MIN) railPos = RAIL_MIN;
         else if (railPos > RAIL_MAX) railPos = RAIL_MAX;
 
-//        robot.rail.setTargetPosition((int) railPos);
+        robot.rail.setTargetPosition((int) railPos);
 
         telemetry.update();
     }
