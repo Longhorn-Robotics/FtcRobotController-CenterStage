@@ -35,6 +35,9 @@ public class TeleopSIGMA extends OpMode {
     static final double PIVOT_DOWN = 0.04f;
     static final double PIVOT_FLOAT = 0.20f;
     static final double PIVOT_BACK = 0.90f;
+    // TODO: Set these values
+    static final double BUCKET_DUMP = 0.20f;
+    static final double BUCKET_PICK = 0.90f;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
@@ -73,10 +76,11 @@ public class TeleopSIGMA extends OpMode {
 
     @SuppressLint("DefaultLocale")
     private final TargetedMotor[] targetedMotors = {
-            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> robot.railMotors.apply(motor -> {motor.setTargetPosition((int) railPosition);
-                    telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
-                    if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
-                    else motor.setPower(0.8);})),
+            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> robot.railMotors.apply(motor -> {
+                motor.setTargetPosition((int) railPosition);
+                if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
+                else motor.setPower(0.8);
+            })),
             new TargetedMotor(EXTEND_IN, EXTEND_OUT, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
     };
 
@@ -124,8 +128,9 @@ public class TeleopSIGMA extends OpMode {
 
     @SuppressLint("DefaultLocale")
     public void rail() {
-        railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
         // Handled by targetedMotors
+        railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
+        telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
     }
 
     @SuppressLint("DefaultLocale")
@@ -152,9 +157,17 @@ public class TeleopSIGMA extends OpMode {
     @SuppressLint("DefaultLocale")
     public void pivot() {
 
-        pivotState = Math.min(Math.max(pivotState, 0), 1);
+        pivotState = Math.min(Math.max(pivotState, 0), 2);
 
         robot.clawPivot.setPosition(new double[]{PIVOT_BACK, PIVOT_DOWN, PIVOT_FLOAT}[pivotState]);
+    }
+
+    @SuppressLint("DefaultLocale")
+    public void bucket() {
+
+        pivotState = Math.min(Math.max(pivotState, 0), 1);
+
+        robot.clawPivot.setPosition(new double[]{BUCKET_DUMP, BUCKET_PICK}[pivotState]);
     }
 
 
@@ -162,16 +175,16 @@ public class TeleopSIGMA extends OpMode {
     @Override
     public void loop() {
 
-        ButtonAction.doActions(buttonActions);
-        TargetedMotor.runArray(targetedMotors);
-
         // Final Robot Instructions
         wheels();
         rail();
-//        dump();
+//        bucket();
         extend();
         pinch();
         pivot();
+
+        ButtonAction.doActions(buttonActions);
+        TargetedMotor.runArray(targetedMotors);
 
         telemetry.update();
     }
