@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import java.util.function.Consumer;
 // import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareSIGMA {
@@ -16,34 +13,16 @@ public class RobotHardwareSIGMA {
     public DcMotor rfDrive;
     public DcMotor bucketRail1;
     public DcMotor bucketRail2;
-    public Servo bucket;
+    public Servo bucket1;
+    public Servo bucket2;
     public Servo clawExtend;
     public Servo clawPivot;
     public Servo clawPinch;
 
-    // Note: Maybe pull this outside?
-    static class DualMotor {
-        DcMotor motor1;
-        DcMotor motor2;
-        public DualMotor(DcMotor _motor1, DcMotor _motor2) {
-            motor1 = _motor1;
-            motor2 = _motor2;
-        }
+    DualMotor<DcMotor> railMotors;
 
-        public void setTargetPosition(int target) {
-            apply((DcMotor a) -> a.setTargetPosition(target));
-        }
-        public void setMode(DcMotor.RunMode mode) {
-            apply((DcMotor a) -> a.setMode(mode));
-        }
-
-        public void apply(Consumer<DcMotor> function) {
-            function.accept(motor1);
-            function.accept(motor2);
-        }
-    }
-
-    DualMotor railMotors;
+    // TODO: Make these scaleRange to the right values, e.t.c.
+    DualMotor<Servo> bucketServos;
 
 //    private ElapsedTime period = new ElapsedTime();
 
@@ -79,9 +58,9 @@ public class RobotHardwareSIGMA {
         bucketRail1 = hwMap.get(DcMotor.class, "railRAIL");
         bucketRail2 = hwMap.get(DcMotor.class, "railRAIL");
 
-        railMotors = new DualMotor(bucketRail1, bucketRail2);
+        railMotors = new DualMotor<>(bucketRail1, bucketRail2);
 
-        railMotors.apply((DcMotor motor) -> {
+        railMotors.apply(motor -> {
             motor.setDirection(DcMotor.Direction.REVERSE);
             motor.setTargetPosition(0);
             motor.setPower(0.8);
@@ -98,5 +77,14 @@ public class RobotHardwareSIGMA {
         clawExtend = hwMap.get(Servo.class, "extendEXTEND");
         clawPivot = hwMap.get(Servo.class, "pivotPIVOT");
         clawPinch = hwMap.get(Servo.class, "pinchPINCH");
+
+
+        // Initialize claw servos
+        bucket1 = hwMap.get(Servo.class, "bucket1");
+        bucket2 = hwMap.get(Servo.class, "bucket2");
+        bucket1.setDirection(Servo.Direction.FORWARD);
+        bucket2.setDirection(Servo.Direction.REVERSE);
+
+        bucketServos = new DualMotor<>(bucket1, bucket2);
     }
 }

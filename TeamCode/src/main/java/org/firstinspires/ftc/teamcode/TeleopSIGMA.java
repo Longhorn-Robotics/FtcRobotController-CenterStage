@@ -26,24 +26,27 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
 
-    static final double RAIL_MIN = 10.0f;
-    static final double RAIL_MAX = 3000.0f;
-    static final double PINCH_OPEN = 0.3f;
-    static final double PINCH_CLOSED = 0.42f;
-    static final double EXTEND_IN = 0.52f;
-    static final double EXTEND_OUT = 0.91f;
-    static final double PIVOT_DOWN = 0.04f;
-    static final double PIVOT_FLOAT = 0.20f;
-    static final double PIVOT_BACK = 0.90f;
+    static final double BUCKET_BACK = 0.0;
+    static final double BUCKET_DUMP = 0.0;
+    static final double RAIL_MIN = 10.0;
+    static final double RAIL_MAX = 3000.0;
+    static final double PINCH_OPEN = 0.3;
+    static final double PINCH_CLOSED = 0.42;
+    static final double EXTEND_IN = 0.52;
+    static final double EXTEND_OUT = 0.91;
+    static final double PIVOT_DOWN = 0.04;
+    static final double PIVOT_FLOAT = 0.20;
+    static final double PIVOT_BACK = 0.90;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
-    double railPosition = 0.0f;
-    double extendPosition = 0.0f;
+    double railPosition = 0.0;
+    double extendPosition = 0.0;
     boolean slowmode = false;
     boolean clawOpen = true;
     double pinchPosition = PINCH_OPEN;
     int pivotState = 0;
+    double bucketTarget = BUCKET_DUMP;
 
     // Debounce Stuff - by Teo
     // It would be a good idea to make this a separate class or something
@@ -106,10 +109,10 @@ public class TeleopSIGMA extends OpMode {
 
     public void wheels() {
 
-        double final_throttle = 0.0f;
-        double final_strafe = 0.0f;
-        double final_yaw = 0.0f;
-        double joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.25f;
+        double final_throttle = 0.0;
+        double final_strafe = 0.0;
+        double final_yaw = 0.0;
+        double joystickMultiplier = !gamepad1.right_bumper ? 1.0 : 0.25;
 
 
         final_throttle += (gamepad1.left_stick_y * joystickMultiplier) + (gamepad2.left_stick_y * 0.2);
@@ -124,7 +127,7 @@ public class TeleopSIGMA extends OpMode {
 
     @SuppressLint("DefaultLocale")
     public void rail() {
-        railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
+        railPosition += (double)(gamepad2.right_trigger - gamepad2.left_trigger) * 20.0;
         // Handled by targetedMotors
     }
 
@@ -157,6 +160,10 @@ public class TeleopSIGMA extends OpMode {
         robot.clawPivot.setPosition(new double[]{PIVOT_BACK, PIVOT_DOWN, PIVOT_FLOAT}[pivotState]);
     }
 
+    public void bucket() {
+        robot.bucketServos.apply(servo -> servo.setPosition(bucketTarget));
+    }
+
 
     // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
@@ -168,7 +175,7 @@ public class TeleopSIGMA extends OpMode {
         // Final Robot Instructions
         wheels();
         rail();
-//        dump();
+        bucket();
         extend();
         pinch();
         pivot();
