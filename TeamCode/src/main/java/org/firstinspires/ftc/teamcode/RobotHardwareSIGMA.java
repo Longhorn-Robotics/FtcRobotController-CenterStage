@@ -67,5 +67,7 @@ public class RobotHardwareSIGMA {
         clawExtend = hwMap.get(Servo.class, "extendEXTEND");
         clawPivot = hwMap.get(Servo.class, "pivotPIVOT");
         clawPinch = hwMap.get(Servo.class, "pinchPINCH");
+
+        bucket = hwMap.get(Servo.class, "bucketR");
     }
 }

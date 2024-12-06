@@ -4,9 +4,6 @@ import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-
-import java.util.function.BooleanSupplier;
 
 @TeleOp(name = "TeleopIntakeCalibration", group = "Pushbot")
 public class TeleopIntakeCalibration extends OpMode {
@@ -23,8 +20,8 @@ public class TeleopIntakeCalibration extends OpMode {
 //    double pinchPosition = 0.0;
 //    double extendPosition = 0.0;
 //    double pivotPosition = 0.0;
-    double bucketLPosition = 0.0;
-    double bucketRPosition = 0.0;
+    double bucketLPosition = 20.0;
+    double bucketRPosition = 20.0;
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -36,8 +33,8 @@ public class TeleopIntakeCalibration extends OpMode {
 //        pinchPosition = robot.pincher.getPosition();
 //        extendPosition = robot.extender.getPosition();
 //        pivotPosition = robot.pivot.getPosition();
-        bucketLPosition = robot.bucketL.getPosition();
-        bucketRPosition = robot.bucketR.getPosition();
+//        bucketLPosition = robot.bucketL.getPosition();
+//        bucketRPosition = robot.bucketR.getPosition();
     }
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -63,11 +60,13 @@ public class TeleopIntakeCalibration extends OpMode {
 //        if (gamepad1.left_bumper) pivotPosition += 0.002;
 //        if (gamepad1.right_bumper) pivotPosition -= 0.002;
 
-        if (gamepad1.dpad_up) bucketLPosition += 0.002;
-        if (gamepad1.dpad_down) bucketLPosition -= 0.002;
+        final double x = 0.01;
 
-        if (gamepad1.left_bumper) bucketRPosition += 0.002;
-        if (gamepad1.right_bumper) bucketRPosition -= 0.002;
+        if (gamepad1.dpad_up) bucketLPosition += x;
+        if (gamepad1.dpad_down) bucketLPosition -= x;
+
+        if (gamepad1.left_bumper) bucketRPosition += x;
+        if (gamepad1.right_bumper) bucketRPosition -= x;
 
 //        telemetry.addLine(String.format("Pinch Position: %6.2f", pinchPosition));
 //        telemetry.addLine(String.format("Extend Position: %6.2f", extendPosition));
@@ -85,6 +84,9 @@ public class TeleopIntakeCalibration extends OpMode {
 
         // extend out: 0.52
         // extend in: 0.91
+
+        // bucket dump R: 1.4
+        // bucket pick R: 0.6
 
         robot.bucketL.setPosition(bucketLPosition);
         robot.bucketR.setPosition(bucketRPosition);

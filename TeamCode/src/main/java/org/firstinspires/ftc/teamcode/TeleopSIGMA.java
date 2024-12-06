@@ -36,8 +36,8 @@ public class TeleopSIGMA extends OpMode {
     static final double PIVOT_FLOAT = 0.20f;
     static final double PIVOT_BACK = 0.90f;
     // TODO: Set these values
-    static final double BUCKET_DUMP = 0.20f;
-    static final double BUCKET_PICK = 0.90f;
+    static final double BUCKET_DUMP = 1.4f;
+    static final double BUCKET_PICK = 0.6f;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
@@ -47,6 +47,8 @@ public class TeleopSIGMA extends OpMode {
     boolean clawOpen = true;
     double pinchPosition = PINCH_OPEN;
     int pivotState = 0;
+
+    boolean bucketPicking = true;
 
     // Debounce Stuff - by Teo
     // It would be a good idea to make this a separate class or something
@@ -68,7 +70,8 @@ public class TeleopSIGMA extends OpMode {
                 robot.clawPinch.setPosition(clawOpen ? PINCH_CLOSED : PINCH_OPEN);
             }),
             new ButtonAction(() -> gamepad2.dpad_left, () -> pivotState++),
-            new ButtonAction(() -> gamepad2.dpad_right, () -> pivotState--)
+            new ButtonAction(() -> gamepad2.dpad_right, () -> pivotState--),
+            new ButtonAction(() -> gamepad2.square, () -> bucketPicking = !bucketPicking)
     };
 
     // Another cool functional programming interface
@@ -164,10 +167,7 @@ public class TeleopSIGMA extends OpMode {
 
     @SuppressLint("DefaultLocale")
     public void bucket() {
-
-        pivotState = Math.min(Math.max(pivotState, 0), 1);
-
-        robot.clawPivot.setPosition(new double[]{BUCKET_DUMP, BUCKET_PICK}[pivotState]);
+        robot.bucket.setPosition(bucketPicking ? BUCKET_PICK : BUCKET_DUMP);
     }
 
 
@@ -178,7 +178,7 @@ public class TeleopSIGMA extends OpMode {
         // Final Robot Instructions
         wheels();
         rail();
-//        bucket();
+        bucket();
         extend();
         pinch();
         pivot();
