@@ -28,21 +28,21 @@ public class TeleopSIGMA extends OpMode {
 
     static final double RAIL_MIN = 10.0f;
     static final double RAIL_MAX = 3000.0f;
-    static final double PINCH_OPEN = 0.3f;
-    static final double PINCH_CLOSED = 0.42f;
-    static final double EXTEND_IN = 0.52f;
-    static final double EXTEND_OUT = 0.91f;
+    static final double PINCH_OPEN = 0.18f;
+    static final double PINCH_CLOSED = 0.3f;
+    static final double EXTEND_IN = 0.42f;
+    static final double EXTEND_OUT = 0.12f;
     static final double PIVOT_DOWN = 0.04f;
     static final double PIVOT_FLOAT = 0.20f;
     static final double PIVOT_BACK = 0.90f;
     // TODO: Set these values
-    static final double BUCKET_DUMP = 1.4f;
-    static final double BUCKET_PICK = 0.6f;
+    static final double BUCKET_DUMP = 1.0f;
+    static final double BUCKET_PICK = 0.7f;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
     double railPosition = 0.0f;
-    double extendPosition = 0.0f;
+    double extendPosition = EXTEND_IN;
     boolean slowmode = false;
     boolean clawOpen = true;
     double pinchPosition = PINCH_OPEN;
@@ -84,7 +84,7 @@ public class TeleopSIGMA extends OpMode {
                 if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
                 else motor.setPower(0.8);
             })),
-            new TargetedMotor(EXTEND_IN, EXTEND_OUT, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
+            new TargetedMotor(EXTEND_OUT, EXTEND_IN, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
     };
 
     // Code to run ONCE when the driver hits INIT
@@ -150,8 +150,8 @@ public class TeleopSIGMA extends OpMode {
         if (gamepad2.dpad_down) extendPosition += 2.5;
 
 
-        extendPosition = Math.min(Math.max(extendPosition, EXTEND_IN), EXTEND_OUT);
-        robot.clawExtend.setPosition(extendPosition);
+//        extendPosition = Math.min(Math.max(extendPosition, EXTEND_IN), EXTEND_OUT);
+//        robot.clawExtend.setPosition(extendPosition);
 
         telemetry.addLine(String.format("Target EXTEND Position: %f", extendPosition));
         telemetry.addLine(String.format("Current EXTEND Position: %f", robot.clawExtend.getPosition()));
@@ -162,12 +162,13 @@ public class TeleopSIGMA extends OpMode {
 
         pivotState = Math.min(Math.max(pivotState, 0), 2);
 
-        robot.clawPivot.setPosition(new double[]{PIVOT_BACK, PIVOT_DOWN, PIVOT_FLOAT}[pivotState]);
+        robot.clawPivot.setPosition(new double[]{PIVOT_DOWN, PIVOT_FLOAT, PIVOT_BACK}[pivotState]);
     }
 
     @SuppressLint("DefaultLocale")
     public void bucket() {
         robot.bucket.setPosition(bucketPicking ? BUCKET_PICK : BUCKET_DUMP);
+        telemetry.addLine(String.format("Bucket setting: %s", bucketPicking ? "PICK" : "DUMP"));
     }
 
 

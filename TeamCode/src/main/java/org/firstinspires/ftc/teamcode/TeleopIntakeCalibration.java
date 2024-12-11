@@ -18,10 +18,10 @@ public class TeleopIntakeCalibration extends OpMode {
     /* Declare OpMode members. */
     RobotHardwareIntakeCalibration robot = new RobotHardwareIntakeCalibration();
 //    double pinchPosition = 0.0;
-//    double extendPosition = 0.0;
+    double extendPosition = 1.0;
 //    double pivotPosition = 0.0;
-    double bucketLPosition = 20.0;
-    double bucketRPosition = 20.0;
+//    double bucketLPosition = 20.0;
+    double bucketRPosition = 0.7;
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -51,28 +51,30 @@ public class TeleopIntakeCalibration extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
+
+
+        final double x = 0.002;
+
 //        if (gamepad1.dpad_right) pinchPosition += 0.002;
 //        if (gamepad1.dpad_left) pinchPosition -= 0.002;
 //
-//        if (gamepad1.dpad_up) extendPosition += 0.002;
-//        if (gamepad1.dpad_down) extendPosition -= 0.002;
+        if (gamepad1.dpad_up) extendPosition -= 0.002;
+        if (gamepad1.dpad_down) extendPosition += 0.002;
 //
 //        if (gamepad1.left_bumper) pivotPosition += 0.002;
 //        if (gamepad1.right_bumper) pivotPosition -= 0.002;
 
-        final double x = 0.01;
 
-        if (gamepad1.dpad_up) bucketLPosition += x;
-        if (gamepad1.dpad_down) bucketLPosition -= x;
+//        if (gamepad1.dpad_up) bucketLPosition += x;
+//        if (gamepad1.dpad_down) bucketLPosition -= x;
 
         if (gamepad1.left_bumper) bucketRPosition += x;
         if (gamepad1.right_bumper) bucketRPosition -= x;
 
 //        telemetry.addLine(String.format("Pinch Position: %6.2f", pinchPosition));
-//        telemetry.addLine(String.format("Extend Position: %6.2f", extendPosition));
+        telemetry.addLine(String.format("Extend Position: %6.2f", extendPosition));
 //        telemetry.addLine(String.format("Pivot Position: %6.2f", pivotPosition));
-//        telemetry.addLine(String.format("Pivot Position: %6.2f", pivotPosition));
-        telemetry.addLine(String.format("Left Position: %6.2f", bucketLPosition));
+//        telemetry.addLine(String.format("Left Position: %6.2f", bucketLPosition));
         telemetry.addLine(String.format("Right Position: %6.2f", bucketRPosition));
 
         // pivot down: 0.04
@@ -82,13 +84,14 @@ public class TeleopIntakeCalibration extends OpMode {
         // pinch open: 0.30
         // pinch closed: 0.42
 
-        // extend out: 0.52
-        // extend in: 0.91
+        // extend out: 0.12
+        // extend in: 0.42
 
-        // bucket dump R: 1.4
+        // bucket dump R: 1.0
         // bucket pick R: 0.6
 
-        robot.bucketL.setPosition(bucketLPosition);
+//        robot.bucketL.setPosition(bucketLPosition);
+        robot.extender.setPosition(extendPosition);
         robot.bucketR.setPosition(bucketRPosition);
 
         telemetry.update();
