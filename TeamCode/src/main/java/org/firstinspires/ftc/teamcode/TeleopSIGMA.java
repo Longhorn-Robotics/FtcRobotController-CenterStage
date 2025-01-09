@@ -29,15 +29,18 @@ public class TeleopSIGMA extends OpMode {
     static final double RAIL_MIN = 10.0f;
     static final double RAIL_MAX = 3000.0f;
     static final double PINCH_OPEN = 0.18f;
-    static final double PINCH_CLOSED = 0.3f;
+    static final double PINCH_CLOSED = 0.28f;
     static final double EXTEND_IN = 0.42f;
     static final double EXTEND_OUT = 0.12f;
     static final double PIVOT_DOWN = 0.04f;
     static final double PIVOT_FLOAT = 0.20f;
     static final double PIVOT_BACK = 0.90f;
     // TODO: Set these values
-    static final double BUCKET_DUMP = 1.0f;
-    static final double BUCKET_PICK = 0.7f;
+    // Tipped: 0.82
+    // Hold: 0.68
+    // Load: 0.54
+    static final double BUCKET_DUMP = 0.82f;
+    static final double BUCKET_PICK = 0.54f;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
@@ -50,6 +53,8 @@ public class TeleopSIGMA extends OpMode {
 
     boolean bucketPicking = true;
 
+    double bucketPosition = 1;
+
     // Debounce Stuff - by Teo
     // It would be a good idea to make this a separate class or something
     // especially given the entire point of this is because it's supposed
@@ -57,10 +62,10 @@ public class TeleopSIGMA extends OpMode {
     // TODO: Find better acronyms
     private final ButtonAction[] buttonActions = {
             new ButtonAction(() -> gamepad1.right_bumper, () -> slowmode = !slowmode),
-            new ButtonAction(() -> gamepad2.triangle, () -> {
-                if (extendPosition == EXTEND_IN) extendPosition = EXTEND_OUT;
-                else extendPosition = EXTEND_IN;
-            }),
+//            new ButtonAction(() -> gamepad2.triangle, () -> {
+//                if (extendPosition == EXTEND_IN) extendPosition = EXTEND_OUT;
+//                else extendPosition = EXTEND_IN;
+//            }),
             new ButtonAction(() -> gamepad2.left_bumper, () -> {
                 if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
                 else railPosition = RAIL_MIN;
@@ -80,11 +85,12 @@ public class TeleopSIGMA extends OpMode {
     @SuppressLint("DefaultLocale")
     private final TargetedMotor[] targetedMotors = {
             new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> robot.railMotors.apply(motor -> {
-                motor.setTargetPosition((int) railPosition);
+//                motor.setTargetPosition((int) railPosition);
+
                 if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
                 else motor.setPower(0.8);
             })),
-            new TargetedMotor(EXTEND_OUT, EXTEND_IN, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
+//            new TargetedMotor(EXTEND_OUT, EXTEND_IN, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
     };
 
     // Code to run ONCE when the driver hits INIT
@@ -133,25 +139,31 @@ public class TeleopSIGMA extends OpMode {
     public void rail() {
         // Handled by targetedMotors
         railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
+        robot.bucketRailL.setTargetPosition((int) railPosition);
+        robot.bucketRailR.setTargetPosition((int) railPosition + 20);
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
     }
 
     @SuppressLint("DefaultLocale")
     public void pinch() {
-        telemetry.addLine(String.format("Target CLAW Position: %f", pinchPosition));
+//        if (gamepad1.dpad_up) pinchPosition -= 0.005;
+//        if (gamepad1.dpad_down) pinchPosition += 0.005;
+
+//        telemetry.addLine(String.format("Target CLAW Position: %f", pinchPosition));
 //        robot.clawPinch.setPosition(pinchPosition);
         telemetry.addLine(String.format("Current CLAW Position: %f", robot.clawPinch.getPosition()));
     }
 
+
     @SuppressLint("DefaultLocale")
     public void extend() {
 //
-        if (gamepad2.dpad_up) extendPosition -= 2.5;
-        if (gamepad2.dpad_down) extendPosition += 2.5;
+        if (gamepad2.dpad_up) extendPosition -= 0.002;
+        if (gamepad2.dpad_down) extendPosition += 0.002;
 
 
 //        extendPosition = Math.min(Math.max(extendPosition, EXTEND_IN), EXTEND_OUT);
-//        robot.clawExtend.setPosition(extendPosition);
+        robot.clawExtend.setPosition(extendPosition);
 
         telemetry.addLine(String.format("Target EXTEND Position: %f", extendPosition));
         telemetry.addLine(String.format("Current EXTEND Position: %f", robot.clawExtend.getPosition()));
@@ -168,7 +180,19 @@ public class TeleopSIGMA extends OpMode {
     @SuppressLint("DefaultLocale")
     public void bucket() {
         robot.bucket.setPosition(bucketPicking ? BUCKET_PICK : BUCKET_DUMP);
-        telemetry.addLine(String.format("Bucket setting: %s", bucketPicking ? "PICK" : "DUMP"));
+
+        // Tipped: 0.82
+        // Hold: 0.68
+        // Load: 0.54
+
+//        if (gamepad1.dpad_up) bucketPosition += 0.02;
+//        if (gamepad1.dpad_down) bucketPosition -= 0.02;
+
+//        robot.bucket.setPosition(bucketPosition);
+        telemetry.addLine(String.format("BucketR: %f", robot.bucket.getPosition()));
+
+
+//        telemetry.addLine(String.format("Bucket setting: %s", bucketPicking ? "PICK" : "DUMP"));
     }
 
 

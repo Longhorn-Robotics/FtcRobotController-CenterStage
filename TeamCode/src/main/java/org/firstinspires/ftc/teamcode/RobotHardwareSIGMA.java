@@ -68,6 +68,6 @@ public class RobotHardwareSIGMA {
         clawPivot = hwMap.get(Servo.class, "pivotPIVOT");
         clawPinch = hwMap.get(Servo.class, "pinchPINCH");
 
-        bucket = hwMap.get(Servo.class, "bucketR");
+        bucket = hwMap.get(Servo.class, "bucketL");
     }
 }

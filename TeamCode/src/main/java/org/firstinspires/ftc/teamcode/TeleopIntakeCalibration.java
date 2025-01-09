@@ -20,8 +20,8 @@ public class TeleopIntakeCalibration extends OpMode {
 //    double pinchPosition = 0.0;
     double extendPosition = 1.0;
 //    double pivotPosition = 0.0;
-//    double bucketLPosition = 20.0;
-    double bucketRPosition = 0.7;
+    double bucketLPosition = 1;
+    double bucketRPosition = 1;
 
     // Code to run ONCE when the driver hits INIT
     @Override
@@ -58,8 +58,8 @@ public class TeleopIntakeCalibration extends OpMode {
 //        if (gamepad1.dpad_right) pinchPosition += 0.002;
 //        if (gamepad1.dpad_left) pinchPosition -= 0.002;
 //
-        if (gamepad1.dpad_up) extendPosition -= 0.002;
-        if (gamepad1.dpad_down) extendPosition += 0.002;
+//        if (gamepad1.dpad_up) extendPosition -= 0.002;
+//        if (gamepad1.dpad_down) extendPosition += 0.002;
 //
 //        if (gamepad1.left_bumper) pivotPosition += 0.002;
 //        if (gamepad1.right_bumper) pivotPosition -= 0.002;
@@ -68,8 +68,8 @@ public class TeleopIntakeCalibration extends OpMode {
 //        if (gamepad1.dpad_up) bucketLPosition += x;
 //        if (gamepad1.dpad_down) bucketLPosition -= x;
 
-        if (gamepad1.left_bumper) bucketRPosition += x;
-        if (gamepad1.right_bumper) bucketRPosition -= x;
+//        if (gamepad1.left_bumper) bucketRPosition += x;
+//        if (gamepad1.right_bumper) bucketRPosition -= x;
 
 //        telemetry.addLine(String.format("Pinch Position: %6.2f", pinchPosition));
         telemetry.addLine(String.format("Extend Position: %6.2f", extendPosition));
@@ -91,8 +91,22 @@ public class TeleopIntakeCalibration extends OpMode {
         // bucket pick R: 0.6
 
 //        robot.bucketL.setPosition(bucketLPosition);
-        robot.extender.setPosition(extendPosition);
+//        robot.extender.setPosition(extendPosition);
+
+        if (gamepad1.dpad_up) bucketLPosition -= 0.002;
+        if (gamepad1.dpad_down) bucketLPosition += 0.002;
+
+        if (gamepad1.dpad_right) bucketRPosition -= 0.002;
+        if (gamepad1.dpad_left) bucketRPosition += 0.002;
+
+        // L: 1;
+        // R: 0.956
+
+        robot.bucketL.setPosition(bucketLPosition);
         robot.bucketR.setPosition(bucketRPosition);
+
+        telemetry.addLine(String.format("BucketL: %f", robot.bucketL.getPosition()));
+        telemetry.addLine(String.format("BucketR: %f", robot.bucketR.getPosition()));
 
         telemetry.update();
     }
