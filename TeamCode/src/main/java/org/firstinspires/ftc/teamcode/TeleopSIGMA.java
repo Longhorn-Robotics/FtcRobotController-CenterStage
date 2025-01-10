@@ -84,12 +84,15 @@ public class TeleopSIGMA extends OpMode {
 
     @SuppressLint("DefaultLocale")
     private final TargetedMotor[] targetedMotors = {
-            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> robot.railMotors.apply(motor -> {
+            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> {
+                robot.railMotors.apply(motor -> {
 //                motor.setTargetPosition((int) railPosition);
-
-                if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
-                else motor.setPower(0.8);
-            })),
+                    if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
+                    else motor.setPower(0.8);
+                });
+                robot.bucketRailL.setTargetPosition((int) railPosition);
+                robot.bucketRailR.setTargetPosition((int) railPosition + 20);
+            }),
 //            new TargetedMotor(EXTEND_OUT, EXTEND_IN, () -> extendPosition, a -> extendPosition = a, a -> robot.clawExtend.setPosition(a))
     };
 
@@ -139,8 +142,6 @@ public class TeleopSIGMA extends OpMode {
     public void rail() {
         // Handled by targetedMotors
         railPosition += (gamepad2.right_trigger - gamepad2.left_trigger) * 20.0f;
-        robot.bucketRailL.setTargetPosition((int) railPosition);
-        robot.bucketRailR.setTargetPosition((int) railPosition + 20);
         telemetry.addLine(String.format("Target RAIL Position: %d", (int) railPosition));
     }
 
