@@ -1,15 +1,25 @@
 package org.firstinspires.ftc.teamcode;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 public class Utils {
-    public static void setTimeout(Runnable runnable, int delay){
-        new Thread(() -> {
-            try {
-                Thread.sleep(delay);
-                runnable.run();
-            }
-            catch (Exception e){
-                System.err.println(e);
-            }
-        }).start();
+    private static final ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(1);
+
+    public static ScheduledFuture<?> setTimeout(Runnable runnable, int delay) {
+        return scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+    }
+
+    public static void cancelTimeout(ScheduledFuture<?> future) {
+        if (future != null) {
+            future.cancel(true);
+        }
+    }
+
+    public static void shutdown() {
+        scheduler.shutdown();
     }
 }
