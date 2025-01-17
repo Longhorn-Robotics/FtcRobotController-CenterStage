@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 // >> Experimental
 
 public class QuodEratDemonstrandum {
     private RobotHardwareSIGMA robot;
+    private Callable<Boolean> opModeIsActive;
 
     private int wheelBL = 0;
     private int wheelFL = 0;
@@ -16,8 +19,11 @@ public class QuodEratDemonstrandum {
 
     private int railPosition = 0;
 
-    public QuodEratDemonstrandum(RobotHardwareSIGMA robot) {
+    private boolean specimenGrabbing = true;
+
+    public QuodEratDemonstrandum(RobotHardwareSIGMA robot, Callable<Boolean> opModeIsActive) {
         this.robot = robot;
+        this.opModeIsActive = opModeIsActive;
     }
 
     public void driveY(int value) {
@@ -41,6 +47,15 @@ public class QuodEratDemonstrandum {
         wheelFR += (int) (degrees * 0.5);
     }
 
+    public void railHeight(int value) {
+        railPosition = value;
+    }
+
+    public void $toggleSpecimen() {
+        specimenGrabbing = !specimenGrabbing;
+        robot.specimenGrabber.setPosition(specimenGrabbing ? 1 : 0);
+    }
+
     public void commit() {
         // set all targets
         robot.lbDrive.setTargetPosition(wheelBL);
@@ -50,18 +65,22 @@ public class QuodEratDemonstrandum {
         robot.bucketRailL.setTargetPosition(railPosition);
         robot.bucketRailR.setTargetPosition(railPosition);
 
-        while (
-                Math.abs(robot.lfDrive.getCurrentPosition() - wheelFL) > 5 || Math.abs(robot.lbDrive.getCurrentPosition() - wheelBL) > 5
-                        || Math.abs(robot.rbDrive.getCurrentPosition() - wheelBR) > 5 || Math.abs(robot.rfDrive.getCurrentPosition() - wheelFR) > 5
-                        || Math.abs(robot.bucketRailL.getCurrentPosition() - railPosition) > 5 || Math.abs(robot.bucketRailR.getCurrentPosition() - railPosition) > 5
-        ) {
-            // wait...
-        }
+        try {
+            while (
+                    opModeIsActive.call() && (
+                            Math.abs(robot.lfDrive.getCurrentPosition() - wheelFL) > 5 || Math.abs(robot.lbDrive.getCurrentPosition() - wheelBL) > 5
+                            || Math.abs(robot.rbDrive.getCurrentPosition() - wheelBR) > 5 || Math.abs(robot.rfDrive.getCurrentPosition() - wheelFR) > 5
+                            || Math.abs(robot.bucketRailL.getCurrentPosition() - railPosition) > 5 || Math.abs(robot.bucketRailR.getCurrentPosition() - railPosition) > 5
+                    )
+            ) {
+                // wait...
+            }
+        } catch (Exception e) {}
 
         return;
     }
 
-    public void pause(int ms) {
+    public void sleep(int ms) {
         try {
             TimeUnit.MILLISECONDS.sleep(ms);
         } catch(InterruptedException e) {}

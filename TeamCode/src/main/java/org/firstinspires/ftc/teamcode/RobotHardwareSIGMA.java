@@ -17,6 +17,7 @@ public class RobotHardwareSIGMA {
     public Servo clawExtend;
     public Servo clawPivot;
     public Servo clawPinch;
+    public Servo specimenGrabber;
 
     GroupMotor railMotors;
     GroupMotor wheels;
@@ -69,5 +70,7 @@ public class RobotHardwareSIGMA {
         clawPinch = hwMap.get(Servo.class, "pinchPINCH");
 
         bucket = hwMap.get(Servo.class, "bucketL");
+
+        specimenGrabber = hwMap.get(Servo.class, "specimenSPECIMEN");
     }
 }

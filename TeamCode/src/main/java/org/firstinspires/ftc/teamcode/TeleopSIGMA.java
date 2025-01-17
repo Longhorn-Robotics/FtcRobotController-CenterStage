@@ -28,7 +28,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class TeleopSIGMA extends OpMode {
 
     static final double RAIL_MIN = 10.0;
-    static final double RAIL_MAX = 3000.0;
+    static final double RAIL_MAX = 2500.0;
     static final double PINCH_OPEN = 0.18;
     static final double PINCH_CLOSED = 0.28;
     static final double EXTEND_IN = 0.42;
