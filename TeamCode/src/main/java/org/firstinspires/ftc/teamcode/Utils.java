@@ -9,7 +9,7 @@ public class Utils {
     private static final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
 
-    public static ScheduledFuture<?> setTimeout(Runnable runnable, int delay) {
+    public static ScheduledFuture<?> setTimeout(int delay, Runnable runnable) {
         return scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
     }
 

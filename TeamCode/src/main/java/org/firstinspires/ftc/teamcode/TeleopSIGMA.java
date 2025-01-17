@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
+import android.widget.Button;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -26,21 +27,22 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
 
-    static final double RAIL_MIN = 10.0f;
-    static final double RAIL_MAX = 3000.0f;
-    static final double PINCH_OPEN = 0.18f;
-    static final double PINCH_CLOSED = 0.28f;
-    static final double EXTEND_IN = 0.42f;
-    static final double EXTEND_OUT = 0.12f;
-    static final double PIVOT_DOWN = 0.04f;
-    static final double PIVOT_FLOAT = 0.20f;
-    static final double PIVOT_BACK = 0.90f;
+    static final double RAIL_MIN = 10.0;
+    static final double RAIL_MAX = 3000.0;
+    static final double PINCH_OPEN = 0.18;
+    static final double PINCH_CLOSED = 0.28;
+    static final double EXTEND_IN = 0.42;
+    static final double EXTEND_OUT = 0.12;
+    static final double PIVOT_DOWN = 0.04;
+    static final double PIVOT_FLOAT = 0.20;
+    static final double PIVOT_BACK = 0.90;
     // Tipped: 0.82
     // Hold: 0.68
     // Load: 0.54
-    static final double BUCKET_DUMP = 0.82f;
-    static final double BUCKET_HOLD = 0.82f;
-    static final double BUCKET_PICK = 0.54f;
+    static final double BUCKET_DUMP = 0.82;
+    static final double BUCKET_HOLD = 0.68;
+    static final double BUCKET_PICK = 0.54;
+    static final float adjustMultiplier = 0.2f;
     static final double[] bucketPositions = new double[]{BUCKET_PICK, BUCKET_HOLD, BUCKET_DUMP};
 
     /* Declare OpMode members. */
@@ -49,52 +51,43 @@ public class TeleopSIGMA extends OpMode {
     double extendPosition = EXTEND_IN;
     double pinchPosition = PINCH_OPEN;
 
-    int pivotState = 0;
+    int pivotState = 2;
     int bucketState = 0;
 
     boolean slowmode = false;
-    boolean clawOpen = true;
 
     // Debounce Stuff - by Teo
-    // It would be a good idea to make this a separate class or something
-    // especially given the entire point of this is because it's supposed
-    // to be better programming practices. But that's boring.
     // TODO: Find better acronyms
     private final ButtonAction[] buttonActions = {
             new ButtonAction(() -> gamepad1.right_bumper, () -> slowmode = !slowmode),
-            new ButtonAction(() -> gamepad2.triangle, () -> {
-                if (extendPosition == EXTEND_IN) extendPosition = EXTEND_OUT;
-                else extendPosition = EXTEND_IN;
+            new ButtonAction(() -> gamepad2.right_bumper, () -> {
+                if (extendPosition == EXTEND_OUT) {
+                    extendPosition = EXTEND_IN;
+                    pivotState = 2;
+                } else {
+                    extendPosition = EXTEND_OUT;
+                    pivotState = 1;
+                }
             }),
-            new ButtonAction(() -> gamepad2.left_bumper, () -> {
-                if (railPosition == RAIL_MIN) railPosition = RAIL_MAX;
-                else railPosition = RAIL_MIN;
-            }),
-            new ButtonAction(() -> gamepad2.circle, () -> {
-                clawOpen = !clawOpen;
-                robot.clawPinch.setPosition(clawOpen ? PINCH_CLOSED : PINCH_OPEN);
-            }),
+            // Toggle between float and down
+            new ButtonAction(() -> gamepad2.triangle, () -> pivotState = (new int[]{1, 0, 0})[pivotState]),
             new ButtonAction(() -> gamepad2.dpad_left, () -> pivotState++),
             new ButtonAction(() -> gamepad2.dpad_right, () -> pivotState--),
-            new ButtonAction(() -> gamepad2.square, () -> {
-                if (bucketState != 0) bucketState = 2;
-                else bucketState = 0;
+            new ButtonAction(() -> gamepad2.circle, () -> {
+                if (pinchPosition == PINCH_CLOSED) pinchPosition = PINCH_OPEN;
+                else pinchPosition = PINCH_CLOSED;
             }),
-            new ButtonAction(() -> gamepad2.right_bumper, () -> {
-                extendPosition = EXTEND_IN;
-                pivotState = 2;
-            }),
-            new ButtonAction(() -> gamepad2.left_bumper, () -> {
-                clawOpen = true;
-
-                Utils.setTimeout(() -> {
-                    extendPosition = EXTEND_IN - 0.3;
-
-                    Utils.setTimeout(() -> {
+            new ButtonAction(() -> gamepad2.cross, () -> {
+                pinchPosition = (PINCH_CLOSED + PINCH_OPEN) * 0.5;
+                Utils.setTimeout(200, () -> {
+                    extendPosition -= 0.04;
+                    Utils.setTimeout(300, () -> {
+                        pivotState = 1;
                         bucketState = 1;
-                    }, 200);
-                }, 200);
+                    });
+                });
             }),
+            new ButtonAction(() -> gamepad2.square, () -> bucketState = (new int[]{0, 2, 0})[bucketState])
     };
 
     // Another cool functional programming interface
@@ -102,7 +95,7 @@ public class TeleopSIGMA extends OpMode {
 
     @SuppressLint("DefaultLocale")
     private final TargetedMotor[] targetedMotors = {
-            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, a -> railPosition = a, a -> {
+            new TargetedMotor(RAIL_MIN, RAIL_MAX, () -> railPosition, x -> railPosition = x, a -> {
                 robot.railMotors.apply(motor -> {
 //                motor.setTargetPosition((int) railPosition);
                     if (motor.getCurrentPosition() > railPosition) motor.setPower(0.4);
@@ -143,12 +136,11 @@ public class TeleopSIGMA extends OpMode {
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
-        double joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.25f;
+        float joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.25f;
 
-
-        final_throttle += (gamepad1.left_stick_y * joystickMultiplier) + (gamepad2.left_stick_y * 0.2);
-        final_strafe += (gamepad1.left_stick_x * joystickMultiplier) + (gamepad2.left_stick_x * 0.2);
-        final_yaw += (gamepad1.right_stick_x * joystickMultiplier) + (gamepad2.right_stick_x * 0.2);
+        final_throttle += (gamepad1.left_stick_y * joystickMultiplier) - (gamepad2.left_stick_y * adjustMultiplier);
+        final_strafe += (gamepad1.left_stick_x * joystickMultiplier) - (gamepad2.left_stick_x * adjustMultiplier);
+        final_yaw += (gamepad1.right_stick_x * joystickMultiplier) + (gamepad2.right_stick_x * adjustMultiplier);
 
         robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
         robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
@@ -169,7 +161,7 @@ public class TeleopSIGMA extends OpMode {
 //        if (gamepad1.dpad_down) pinchPosition += 0.005;
 
 //        telemetry.addLine(String.format("Target CLAW Position: %f", pinchPosition));
-//        robot.clawPinch.setPosition(pinchPosition);
+        robot.clawPinch.setPosition(pinchPosition);
         telemetry.addLine(String.format("Current CLAW Position: %f", robot.clawPinch.getPosition()));
     }
 
