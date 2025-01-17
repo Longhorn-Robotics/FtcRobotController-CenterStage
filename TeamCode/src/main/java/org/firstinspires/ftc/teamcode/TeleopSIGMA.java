@@ -34,7 +34,7 @@ public class TeleopSIGMA extends OpMode {
     static final double EXTEND_IN = 0.42;
     static final double EXTEND_OUT = 0.12;
     static final double PIVOT_DOWN = 0.04;
-    static final double PIVOT_FLOAT = 0.20;
+    static final double PIVOT_FLOAT = 0.25;
     static final double PIVOT_BACK = 0.90;
     // Tipped: 0.82
     // Hold: 0.68
@@ -42,7 +42,7 @@ public class TeleopSIGMA extends OpMode {
     static final double BUCKET_DUMP = 0.82;
     static final double BUCKET_HOLD = 0.68;
     static final double BUCKET_PICK = 0.54;
-    static final float adjustMultiplier = 0.2f;
+    static final float adjustMultiplier = 0.3f;
     static final double[] bucketPositions = new double[]{BUCKET_PICK, BUCKET_HOLD, BUCKET_DUMP};
 
     /* Declare OpMode members. */
@@ -61,11 +61,11 @@ public class TeleopSIGMA extends OpMode {
     private final ButtonAction[] buttonActions = {
             new ButtonAction(() -> gamepad1.right_bumper, () -> slowmode = !slowmode),
             new ButtonAction(() -> gamepad2.right_bumper, () -> {
-                if (extendPosition == EXTEND_OUT) {
+                if (extendPosition > ((EXTEND_OUT + EXTEND_IN) * 0.5) ) {
                     extendPosition = EXTEND_IN;
                     pivotState = 2;
                 } else {
-                    extendPosition = EXTEND_OUT;
+                    extendPosition = EXTEND_IN + (EXTEND_OUT - EXTEND_IN) * 0.75;
                     pivotState = 1;
                 }
             }),
