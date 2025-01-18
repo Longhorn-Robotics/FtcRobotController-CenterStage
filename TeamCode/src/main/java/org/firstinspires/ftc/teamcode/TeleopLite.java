@@ -1,7 +1,9 @@
-package org.firstinspires.ftc.teamcode.lite;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.hardware.RobotHardwareLite;
 
 @TeleOp(name = "TeleopLite", group = "Pushbot")
 public class TeleopLite extends OpMode {

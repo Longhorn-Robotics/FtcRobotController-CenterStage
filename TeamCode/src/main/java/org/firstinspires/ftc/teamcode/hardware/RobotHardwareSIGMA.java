@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.utils.GroupMotor;
 // import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareSIGMA {
@@ -19,8 +21,8 @@ public class RobotHardwareSIGMA {
     public Servo clawPinch;
     public Servo specimenGrabber;
 
-    GroupMotor railMotors;
-    GroupMotor wheels;
+    public GroupMotor railMotors;
+    public GroupMotor wheels;
 
 //    private ElapsedTime period = new ElapsedTime();
 

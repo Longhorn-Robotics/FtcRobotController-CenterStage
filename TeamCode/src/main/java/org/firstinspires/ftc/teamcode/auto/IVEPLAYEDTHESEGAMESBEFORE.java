@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.QuodEratDemonstrandum;
-import org.firstinspires.ftc.teamcode.RobotHardwareSIGMA;
+import org.firstinspires.ftc.teamcode.hardware.RobotHardwareSIGMA;
 
 @Autonomous(name="I'VE PLAYED THESE GAMES BEFORE", group="Robot")
 public class IVEPLAYEDTHESEGAMESBEFORE extends LinearOpMode {

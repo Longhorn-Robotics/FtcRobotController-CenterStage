@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.function.Consumer;
 
 // Note: Maybe pull this outside?
-class GroupMotor {
+public class GroupMotor {
     DcMotor[] motors;
 
     public GroupMotor(DcMotor... _motors) {

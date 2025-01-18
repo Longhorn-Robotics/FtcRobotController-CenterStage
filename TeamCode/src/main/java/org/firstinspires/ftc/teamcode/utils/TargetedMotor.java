@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.utils;
 
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
