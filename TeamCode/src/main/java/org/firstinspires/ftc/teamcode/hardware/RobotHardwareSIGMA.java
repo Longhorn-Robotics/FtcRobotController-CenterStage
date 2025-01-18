@@ -56,7 +56,7 @@ public class RobotHardwareSIGMA {
 
         railMotors.apply((DcMotor motor) -> {
             motor.setTargetPosition(0);
-            motor.setPower(0.8);
+            motor.setPower(1);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

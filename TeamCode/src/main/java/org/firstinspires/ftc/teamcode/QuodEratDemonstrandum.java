@@ -57,14 +57,19 @@ public class QuodEratDemonstrandum {
         robot.specimenGrabber.setPosition(specimenGrabbing ? 1 : 0);
     }
 
-    public void commit() {
-        // set all targets
+    public void $setAllTargets() {
         robot.lbDrive.setTargetPosition(wheelBL);
         robot.lfDrive.setTargetPosition(wheelFL);
         robot.rbDrive.setTargetPosition(wheelBR);
         robot.rfDrive.setTargetPosition(wheelFR);
         robot.bucketRailL.setTargetPosition(railPosition);
         robot.bucketRailR.setTargetPosition(railPosition);
+        robot.specimenGrabber.setPosition(specimenGrabbing ? 1 : 0);
+    }
+
+    public void commit() {
+        // set all targets
+        $setAllTargets();
 
         try {
             while (
