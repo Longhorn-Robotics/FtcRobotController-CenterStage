@@ -37,6 +37,8 @@ public class IMPLAYINGTHESEGAMESRIGHTNOW extends OpMode {
             previousRailHeight = railHeight;
         }
 
+        movementIncrement = gamepad2.right_bumper ? 50 : 10;
+
         if (gamepad2.dpad_up) {
             commands.driveY(movementIncrement);
             driveY += movementIncrement;
