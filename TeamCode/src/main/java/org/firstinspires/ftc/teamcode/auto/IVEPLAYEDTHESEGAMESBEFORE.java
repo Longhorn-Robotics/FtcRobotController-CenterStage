@@ -10,16 +10,17 @@ import org.firstinspires.ftc.teamcode.hardware.RobotHardwareSIGMA;
 @Autonomous(name="I'VE PLAYED THESE GAMES BEFORE", group="Robot")
 public class IVEPLAYEDTHESEGAMESBEFORE extends LinearOpMode {
 
-    private RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
-    private ElapsedTime runtime = new ElapsedTime();
+    final private RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
+    final private ElapsedTime runtime = new ElapsedTime();
+    QuodEratDemonstrandum commands;
 
     @Override
     public void runOpMode() {
         // Init
         robot.init(hardwareMap);
-        QuodEratDemonstrandum commands = new QuodEratDemonstrandum(robot, () -> opModeIsActive());
+        commands = new QuodEratDemonstrandum(robot, () -> opModeIsActive(), telemetry);
         commands.init();
-        telemetry.addLine("> Ready.");
+        telemetry.addLine("> Ready?");
         telemetry.update();
 
         // Wait for autonomous to start
@@ -28,26 +29,43 @@ public class IVEPLAYEDTHESEGAMESBEFORE extends LinearOpMode {
         telemetry.update();
 
         // Position in front of submersible and raise linear rails
-        commands.driveY(50);
-        commands.driveX(-800);
-        commands.railHeight(2000);
-        commands.commit();
+        commands.driveY(1050);
+        commands.driveX(-620);
+        commands.railHeight(1575);
+        commands.$setAllTargets();
+//        commands.commit();
+        sleep(3500);
+
+//        commands.railHeight(1575);
+////        robot.railMotors.apply(motor -> {
+////            motor.setTargetPosition(1575);
+////        });
+//        commands.$setAllTargets();
+//        commands.commit();
+//        sleep(1500);
 
         // Drive into submersible
-        commands.driveY(300);
-        commands.commit();
+        commands.driveY(380);
+//        commands.commit();
+        commands.$setAllTargets();
+        sleep(1000);
 
         // Lower rails to hook specimen
-        commands.railHeight(1800);
-        commands.commit();
+        commands.railHeight(1150);
+//        commands.commit();
+        commands.$setAllTargets();
+        sleep(1000);
 
         // Release specimen
         commands.$toggleSpecimen();
-        commands.sleep(100);
+//        commands.sleep(100);
+        sleep(100);
 
         // Reverse slightly
-        commands.driveY(-50);
-        commands.commit();
+        commands.driveY(-350);
+//        commands.commit();
+        commands.$setAllTargets();
+        sleep(500);
 
         // Lower rails
         commands.railHeight(0);

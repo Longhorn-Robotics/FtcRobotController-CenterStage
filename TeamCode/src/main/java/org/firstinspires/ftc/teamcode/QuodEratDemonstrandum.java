@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.RobotHardwareSIGMA;
 
 import java.util.concurrent.Callable;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class QuodEratDemonstrandum {
     private RobotHardwareSIGMA robot;
     private Callable<Boolean> opModeIsActive;
+    private Telemetry telemetry;
 
     private int wheelBL = 0;
     private int wheelFL = 0;
@@ -21,10 +23,13 @@ public class QuodEratDemonstrandum {
     private int railPosition = 0;
 
     private boolean specimenGrabbing = true;
+    static final double SPECIMEN_CLOSE = 0.068;
+    static final double SPECIMEN_OPEN = 0.452;
 
-    public QuodEratDemonstrandum(RobotHardwareSIGMA robot, Callable<Boolean> opModeIsActive) {
+    public QuodEratDemonstrandum(RobotHardwareSIGMA robot, Callable<Boolean> opModeIsActive, Telemetry telemetry) {
         this.robot = robot;
         this.opModeIsActive = opModeIsActive;
+        this.telemetry = telemetry;
     }
 
     public void driveY(int value) {
@@ -54,7 +59,7 @@ public class QuodEratDemonstrandum {
 
     public void $toggleSpecimen() {
         specimenGrabbing = !specimenGrabbing;
-        robot.specimenGrabber.setPosition(specimenGrabbing ? 1 : 0);
+        robot.specimenGrabber.setPosition(specimenGrabbing ? SPECIMEN_CLOSE : SPECIMEN_OPEN);
     }
 
     public void $setAllTargets() {
@@ -64,7 +69,7 @@ public class QuodEratDemonstrandum {
         robot.rfDrive.setTargetPosition(wheelFR);
         robot.bucketRailL.setTargetPosition(railPosition);
         robot.bucketRailR.setTargetPosition(railPosition);
-        robot.specimenGrabber.setPosition(specimenGrabbing ? 1 : 0);
+        robot.specimenGrabber.setPosition(specimenGrabbing ? SPECIMEN_CLOSE : SPECIMEN_OPEN);
     }
 
     public void commit() {
@@ -73,13 +78,21 @@ public class QuodEratDemonstrandum {
 
         try {
             while (
-                    opModeIsActive.call() && (
-                            Math.abs(robot.lfDrive.getCurrentPosition() - wheelFL) > 5 || Math.abs(robot.lbDrive.getCurrentPosition() - wheelBL) > 5
-                            || Math.abs(robot.rbDrive.getCurrentPosition() - wheelBR) > 5 || Math.abs(robot.rfDrive.getCurrentPosition() - wheelFR) > 5
-                            || Math.abs(robot.bucketRailL.getCurrentPosition() - railPosition) > 5 || Math.abs(robot.bucketRailR.getCurrentPosition() - railPosition) > 5
+                    true && (
+                            Math.abs(robot.lfDrive.getCurrentPosition() - wheelFL) > 10 || Math.abs(robot.lbDrive.getCurrentPosition() - wheelBL) > 10
+                            || Math.abs(robot.rbDrive.getCurrentPosition() - wheelBR) > 10 || Math.abs(robot.rfDrive.getCurrentPosition() - wheelFR) > 10
+                            || Math.abs(robot.bucketRailL.getCurrentPosition() - railPosition) > 10
                     )
             ) {
                 // wait...
+
+                $setAllTargets();
+
+                telemetry.addLine(String.format("lfDrive: %f", robot.lfDrive.getCurrentPosition()));
+                telemetry.addLine(String.format("lbDrive: %f", robot.lbDrive.getCurrentPosition()));
+                telemetry.addLine(String.format("rfDrive: %f", robot.rfDrive.getCurrentPosition()));
+                telemetry.addLine(String.format("rbDrive: %f", robot.rbDrive.getCurrentPosition()));
+                telemetry.update();
             }
         } catch (Exception e) {}
 
@@ -98,7 +111,7 @@ public class QuodEratDemonstrandum {
             motor.setPower(0.5);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         });
     }

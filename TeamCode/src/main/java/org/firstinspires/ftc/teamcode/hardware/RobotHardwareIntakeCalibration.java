@@ -12,6 +12,7 @@ public class RobotHardwareIntakeCalibration {
 //    public Servo pivot;
     public Servo bucketL;
     public Servo bucketR;
+    public Servo specimenGrabber;
 
     private ElapsedTime period = new ElapsedTime();
 
@@ -22,9 +23,11 @@ public class RobotHardwareIntakeCalibration {
         hwMap = ahwMap;
 
 //        pincher = hwMap.get(Servo.class, "pinchPINCH");
-        extender = hwMap.get(Servo.class, "extendEXTEND");
+//        extender = hwMap.get(Servo.class, "extendEXTEND");
 //        pivot = hwMap.get(Servo.class, "pivotPIVOT");
-        bucketL = hwMap.get(Servo.class, "bucketL");
-        bucketR = hwMap.get(Servo.class, "bucketR");
+//        bucketL = hwMap.get(Servo.class, "bucketL");
+//        bucketR = hwMap.get(Servo.class, "bucketR");
+
+        specimenGrabber = hwMap.get(Servo.class, "specimenSPECIMEN");
     }
 }

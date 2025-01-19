@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import android.annotation.SuppressLint;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.QuodEratDemonstrandum;
 import org.firstinspires.ftc.teamcode.hardware.RobotHardwareSIGMA;
@@ -21,14 +24,16 @@ public class IMPLAYINGTHESEGAMESRIGHTNOW extends OpMode {
 
     public void init() {
         robot.init(hardwareMap);
-        commands = new QuodEratDemonstrandum(robot, () -> true);
+        commands = new QuodEratDemonstrandum(robot, () -> true, telemetry);
         commands.init();
 
         telemetry.addLine("> Ready.");
         telemetry.addLine("> Programming mode [ Gamepad 2 ]");
+        telemetry.addLine("> D-pad to control");
         telemetry.update();
     }
 
+    @SuppressLint("DefaultLocale")
     public void loop() {
         // Handle reset
         if (gamepad2.x) {
@@ -61,17 +66,13 @@ public class IMPLAYINGTHESEGAMESRIGHTNOW extends OpMode {
         commands.railHeight((int) railHeight);
         commands.$setAllTargets();
 
-
-
         // Telemetry
 
         telemetry.addLine("> Current commands:");
+        if (driveX != 0) telemetry.addLine(String.format("--> commands.driveX(%d)", driveX));
+        if (driveY != 0) telemetry.addLine(String.format("--> commands.driveY(%d)", driveY));
+        if (railHeight != previousRailHeight) telemetry.addLine(String.format("--> commands.railHeight(%d)",(int) railHeight));
 
-        if (driveX != 0) telemetry.addData("--> commands.driveX(%d)", driveX);
-        if (driveY != 0) telemetry.addData("--> commands.driveY(%d)", driveY);
-        if (railHeight != previousRailHeight) telemetry.addData("--> commands.railHeight(%d)", (int) railHeight);
-
-        telemetry.addLine("--> (use the d-pad driving commands will start to appear here)");
         telemetry.addLine("\n[ X button on the controller to reset ]");
         telemetry.update();
     }

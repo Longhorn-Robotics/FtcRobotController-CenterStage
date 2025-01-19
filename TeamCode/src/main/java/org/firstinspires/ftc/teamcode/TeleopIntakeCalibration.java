@@ -25,6 +25,8 @@ public class TeleopIntakeCalibration extends OpMode {
     double bucketLPosition = 1;
     double bucketRPosition = 1;
 
+    double aidensDrivingTheBusNow = 0;
+
     // Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
@@ -95,20 +97,26 @@ public class TeleopIntakeCalibration extends OpMode {
 //        robot.bucketL.setPosition(bucketLPosition);
 //        robot.extender.setPosition(extendPosition);
 
-        if (gamepad1.dpad_up) bucketLPosition -= 0.002;
-        if (gamepad1.dpad_down) bucketLPosition += 0.002;
+//        if (gamepad1.dpad_up) bucketLPosition -= 0.002;
+//        if (gamepad1.dpad_down) bucketLPosition += 0.002;
 
-        if (gamepad1.dpad_right) bucketRPosition -= 0.002;
-        if (gamepad1.dpad_left) bucketRPosition += 0.002;
+//        if (gamepad1.dpad_right) bucketRPosition -= 0.002;
+//        if (gamepad1.dpad_left) bucketRPosition += 0.002;
+
+        if (gamepad1.dpad_left) aidensDrivingTheBusNow -= 0.002;
+        if (gamepad1.dpad_right) aidensDrivingTheBusNow += 0.002;
 
         // L: 1;
         // R: 0.956
 
-        robot.bucketL.setPosition(bucketLPosition);
-        robot.bucketR.setPosition(bucketRPosition);
+//        robot.bucketL.setPosition(bucketLPosition);
+//        robot.bucketR.setPosition(bucketRPosition);
 
-        telemetry.addLine(String.format("BucketL: %f", robot.bucketL.getPosition()));
-        telemetry.addLine(String.format("BucketR: %f", robot.bucketR.getPosition()));
+        robot.specimenGrabber.setPosition(aidensDrivingTheBusNow);
+        telemetry.addLine(String.format("SpecimenGrabber: %f",robot.specimenGrabber.getPosition()));
+
+//        telemetry.addLine(String.format("BucketL: %f", robot.bucketL.getPosition()));
+//        telemetry.addLine(String.format("BucketR: %f", robot.bucketR.getPosition()));
 
         telemetry.update();
     }
@@ -118,3 +126,4 @@ public class TeleopIntakeCalibration extends OpMode {
     public void stop() {
     }
 }
+

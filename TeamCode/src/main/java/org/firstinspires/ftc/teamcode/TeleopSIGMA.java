@@ -34,8 +34,8 @@ public class TeleopSIGMA extends OpMode {
     static final double RAIL_MIN = 10.0;
     static final double RAIL_MAX = 2500.0;
     static final double PINCH_OPEN = 0.18;
-    static final double PINCH_CLOSED = 0.28;
-    static final double EXTEND_IN = 0.42;
+    static final double PINCH_CLOSED = 0.30;
+    static final double EXTEND_IN = 0.44;
     static final double EXTEND_OUT = 0.12;
     static final double PIVOT_DOWN = 0.04;
     static final double PIVOT_FLOAT = 0.25;
@@ -46,8 +46,10 @@ public class TeleopSIGMA extends OpMode {
     static final double BUCKET_DUMP = 0.82;
     static final double BUCKET_HOLD = 0.68;
     static final double BUCKET_PICK = 0.54;
-    static final float adjustMultiplier = 0.3f;
+    static final float adjustMultiplier = 0.225f;
     static final double[] bucketPositions = new double[]{BUCKET_PICK, BUCKET_HOLD, BUCKET_DUMP};
+    static final double SPECIMEN_CLOSE = 0.068;
+    static final double SPECIMEN_OPEN = 0.452;
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
@@ -57,15 +59,20 @@ public class TeleopSIGMA extends OpMode {
 
     int pivotState = 2;
     int bucketState = 0;
+    boolean specimenGrabbing = true;
 
     boolean slowmode = false;
+    boolean inverse1 = false;
+    boolean inverse2 = false;
 
     // Debounce Stuff - by Teo
     // TODO: Find better acronyms
     private final ButtonAction[] buttonActions = {
-            new ButtonAction(() -> gamepad1.right_bumper, () -> slowmode = !slowmode),
+//            new ButtonAction(() -> gamepad1.right_bumper, () -> slowmode = !slowmode),
+            new ButtonAction(() -> gamepad1.left_bumper, () -> inverse1 = !inverse1),
+            new ButtonAction(() -> gamepad2.left_bumper, () -> inverse2 = !inverse2),
             new ButtonAction(() -> gamepad2.right_bumper, () -> {
-                if (extendPosition > ((EXTEND_OUT + EXTEND_IN) * 0.5) ) {
+                if (extendPosition < ((EXTEND_OUT + EXTEND_IN) * 0.5) ) {
                     extendPosition = EXTEND_IN;
                     pivotState = 2;
                 } else {
@@ -81,6 +88,7 @@ public class TeleopSIGMA extends OpMode {
                 if (pinchPosition == PINCH_CLOSED) pinchPosition = PINCH_OPEN;
                 else pinchPosition = PINCH_CLOSED;
             }),
+            new ButtonAction(() -> gamepad1.y, () -> specimenGrabbing = !specimenGrabbing),
             new ButtonAction(() -> gamepad2.cross, () -> {
                 pinchPosition = (PINCH_CLOSED + PINCH_OPEN) * 0.5;
                 Utils.setTimeout(200, () -> {
@@ -91,7 +99,7 @@ public class TeleopSIGMA extends OpMode {
                     });
                 });
             }),
-            new ButtonAction(() -> gamepad2.square, () -> bucketState = (new int[]{0, 2, 0})[bucketState])
+            new ButtonAction(() -> gamepad1.square, () -> bucketState = (new int[]{0, 2, 0})[bucketState])
     };
 
     // Another cool functional programming interface
@@ -140,10 +148,10 @@ public class TeleopSIGMA extends OpMode {
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
-        float joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.25f;
+        float joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.45f;
 
-        final_throttle += (gamepad1.left_stick_y * joystickMultiplier) - (gamepad2.left_stick_y * adjustMultiplier);
-        final_strafe += (gamepad1.left_stick_x * joystickMultiplier) - (gamepad2.left_stick_x * adjustMultiplier);
+        final_throttle += (gamepad1.left_stick_y * joystickMultiplier * (inverse1 ? -1 : 1)) - (gamepad2.left_stick_y * adjustMultiplier * (inverse2 ? -1 : 1));
+        final_strafe += (gamepad1.left_stick_x * joystickMultiplier * (inverse1 ? -1 : 1)) - (gamepad2.left_stick_x * adjustMultiplier * (inverse2 ? -1 : 1));
         final_yaw += (gamepad1.right_stick_x * joystickMultiplier) + (gamepad2.right_stick_x * adjustMultiplier);
 
         robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
@@ -211,6 +219,8 @@ public class TeleopSIGMA extends OpMode {
         extend();
         pinch();
         pivot();
+
+        robot.specimenGrabber.setPosition(specimenGrabbing ? SPECIMEN_CLOSE : SPECIMEN_OPEN);
 
         ButtonAction.doActions(buttonActions);
         TargetedMotor.runArray(targetedMotors);
