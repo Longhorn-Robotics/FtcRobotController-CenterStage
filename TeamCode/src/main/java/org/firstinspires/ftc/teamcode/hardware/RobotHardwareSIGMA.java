@@ -1,14 +1,21 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.utils.GroupMotor;
-// import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareSIGMA {
     HardwareMap hwMap;
+
+    public IMU imu;
+    static RevHubOrientationOnRobot.LogoFacingDirection[] logoFacingDirections = RevHubOrientationOnRobot.LogoFacingDirection.values();
+    static RevHubOrientationOnRobot.UsbFacingDirection[] usbFacingDirections = RevHubOrientationOnRobot.UsbFacingDirection.values();
+
     public DcMotor lbDrive;
     public DcMotor lfDrive;
     public DcMotor rbDrive;
@@ -31,6 +38,10 @@ public class RobotHardwareSIGMA {
     public void init(HardwareMap ahwMap) {
         // Save reference to hardware map
         hwMap = ahwMap;
+
+        // Initialize IMU
+        imu = hwMap.get(IMU.class, "imu");
+        updateOrientation();
 
         // Initialize drive motors
         lfDrive = hwMap.get(DcMotor.class, "motorFL");
@@ -63,10 +74,7 @@ public class RobotHardwareSIGMA {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         });
 
-
-//        bucket = hwMap.get(Servo.class, "bucketServo");
-
-        // Initialize claw servos
+        // Initialize intake servos
         clawExtend = hwMap.get(Servo.class, "extendEXTEND");
         clawPivot = hwMap.get(Servo.class, "pivotPIVOT");
         clawPinch = hwMap.get(Servo.class, "pinchPINCH");
@@ -74,5 +82,19 @@ public class RobotHardwareSIGMA {
         bucket = hwMap.get(Servo.class, "bucketL");
 
         specimenGrabber = hwMap.get(Servo.class, "specimenSPECIMEN");
+    }
+
+    public YawPitchRollAngles getOrinatation() {
+        return imu.getRobotYawPitchRollAngles();
+    }
+
+    public void updateOrientation() {
+        RevHubOrientationOnRobot.LogoFacingDirection logo = logoFacingDirections[1];
+        RevHubOrientationOnRobot.UsbFacingDirection usb = usbFacingDirections[0];
+        try {
+            RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logo, usb);
+            imu.initialize(new IMU.Parameters(orientationOnRobot));
+        } catch (IllegalArgumentException e) {
+        }
     }
 }
