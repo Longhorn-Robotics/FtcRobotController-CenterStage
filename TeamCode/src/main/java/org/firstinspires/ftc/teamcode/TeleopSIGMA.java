@@ -31,11 +31,11 @@ import org.firstinspires.ftc.teamcode.utils.Utils;
 @TeleOp(name = "TeleopSIGMA", group = "Pushbot")
 public class TeleopSIGMA extends OpMode {
 
-    static final double RAIL_MIN = 10.0;
-    static final double RAIL_MAX = 2500.0;
+    static final double RAIL_MIN = 0.0;
+    static final double RAIL_MAX = 2800.0;
     static final double PINCH_OPEN = 0.18;
     static final double PINCH_CLOSED = 0.30;
-    static final double EXTEND_IN = 0.44;
+    static final double EXTEND_IN = 0.42;
     static final double EXTEND_OUT = 0.12;
     static final double PIVOT_DOWN = 0.04;
     static final double PIVOT_FLOAT = 0.25;
@@ -99,7 +99,7 @@ public class TeleopSIGMA extends OpMode {
                     });
                 });
             }),
-            new ButtonAction(() -> gamepad1.square, () -> bucketState = (new int[]{0, 2, 0})[bucketState])
+            new ButtonAction(() -> gamepad1.square, () -> bucketState = (new int[]{2, 2, 0})[bucketState])
     };
 
     // Another cool functional programming interface
@@ -148,7 +148,7 @@ public class TeleopSIGMA extends OpMode {
         double final_throttle = 0.0f;
         double final_strafe = 0.0f;
         double final_yaw = 0.0f;
-        float joystickMultiplier = !gamepad1.right_bumper ? 1.0f : 0.45f;
+        float joystickMultiplier = !gamepad1.right_bumper ? 0.8f : 0.45f;
 
         final_throttle += (gamepad1.left_stick_y * joystickMultiplier * (inverse1 ? -1 : 1)) - (gamepad2.left_stick_y * adjustMultiplier * (inverse2 ? -1 : 1));
         final_strafe += (gamepad1.left_stick_x * joystickMultiplier * (inverse1 ? -1 : 1)) - (gamepad2.left_stick_x * adjustMultiplier * (inverse2 ? -1 : 1));
