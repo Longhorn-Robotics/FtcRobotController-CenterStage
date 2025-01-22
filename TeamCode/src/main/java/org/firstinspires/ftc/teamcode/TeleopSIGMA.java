@@ -55,6 +55,10 @@ public class TeleopSIGMA extends OpMode {
 
     /* Declare OpMode members. */
     RobotHardwareSIGMA robot = new RobotHardwareSIGMA();
+
+    double robotReferenceYaw = 0;
+    double robotCurrentYaw = 0;
+
     double railPosition = RAIL_MIN;
     double extendPosition = EXTEND_IN;
     double pinchPosition = PINCH_OPEN;
@@ -133,6 +137,8 @@ public class TeleopSIGMA extends OpMode {
             dcMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             dcMotor.setTargetPosition((int) RAIL_MIN);
         }));
+
+        robotReferenceYaw = robot.getOrinatation().getYaw(AngleUnit.RADIANS);
     }
 
     // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -146,20 +152,30 @@ public class TeleopSIGMA extends OpMode {
     }
 
     public void wheels() {
+        double joystick_y = 0.0;
+        double joystick_x = 0.0;
+        double joystick_yaw = 0.0;
+        double joystickMultiplier = !gamepad1.right_bumper ? 0.8 : 0.45;
 
-        double final_throttle = 0.0f;
-        double final_strafe = 0.0f;
-        double final_yaw = 0.0f;
-        float joystickMultiplier = !gamepad1.right_bumper ? 0.8f : 0.45f;
+        joystick_y += (gamepad1.left_stick_y * joystickMultiplier) - (gamepad2.left_stick_y * adjustMultiplier);
+        joystick_x += (gamepad1.left_stick_x * joystickMultiplier) - (gamepad2.left_stick_x * adjustMultiplier);
+        joystick_yaw += (gamepad1.right_stick_x * joystickMultiplier) + (gamepad2.right_stick_x * adjustMultiplier);
 
-        final_throttle += (gamepad1.left_stick_y * joystickMultiplier * (inverse1 ? -1 : 1)) - (gamepad2.left_stick_y * adjustMultiplier * (inverse2 ? -1 : 1));
-        final_strafe += (gamepad1.left_stick_x * joystickMultiplier * (inverse1 ? -1 : 1)) - (gamepad2.left_stick_x * adjustMultiplier * (inverse2 ? -1 : 1));
-        final_yaw += (gamepad1.right_stick_x * joystickMultiplier) + (gamepad2.right_stick_x * adjustMultiplier);
+        // Only update yaw rotation if the robot stationary or spinning
+        // This helps prevent wobbly motion when trying to move in straight lines
+        if ((joystick_x == 0.0 && joystick_y == 0.0) || joystick_yaw != 0.0) robotCurrentYaw = robot.getOrinatation().getYaw(AngleUnit.RADIANS);
 
-        robot.lfDrive.setPower(final_throttle - final_strafe - final_yaw);
-        robot.lbDrive.setPower(final_throttle + final_strafe - final_yaw);
-        robot.rfDrive.setPower(-final_throttle - final_strafe - final_yaw);
-        robot.rbDrive.setPower(-final_throttle + final_strafe - final_yaw);
+        double theta = robotReferenceYaw - robotCurrentYaw;
+        double sinT = Math.sin(theta);
+        double cosT = Math.cos(theta);
+
+        double corrected_strafe = joystick_x * cosT - joystick_y * sinT;
+        double corrected_throttle = joystick_x * sinT + joystick_y * cosT;
+
+        robot.lfDrive.setPower(corrected_throttle - corrected_strafe - joystick_yaw);
+        robot.lbDrive.setPower(corrected_throttle + corrected_strafe - joystick_yaw);
+        robot.rfDrive.setPower(-corrected_throttle - corrected_strafe - joystick_yaw);
+        robot.rbDrive.setPower(-corrected_throttle + corrected_strafe - joystick_yaw);
     }
 
     @SuppressLint("DefaultLocale")
@@ -221,11 +237,6 @@ public class TeleopSIGMA extends OpMode {
         extend();
         pinch();
         pivot();
-
-        YawPitchRollAngles orientation = robot.getOrinatation();
-        telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
-        telemetry.addData("Pitch (X)", "%.2f Deg.", orientation.getPitch(AngleUnit.DEGREES));
-        telemetry.addData("Roll (Y)", "%.2f Deg.\n", orientation.getRoll(AngleUnit.DEGREES));
 
         robot.specimenGrabber.setPosition(specimenGrabbing ? SPECIMEN_CLOSE : SPECIMEN_OPEN);
 

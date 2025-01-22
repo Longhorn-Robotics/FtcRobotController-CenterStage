@@ -13,8 +13,6 @@ public class RobotHardwareSIGMA {
     HardwareMap hwMap;
 
     public IMU imu;
-    static RevHubOrientationOnRobot.LogoFacingDirection[] logoFacingDirections = RevHubOrientationOnRobot.LogoFacingDirection.values();
-    static RevHubOrientationOnRobot.UsbFacingDirection[] usbFacingDirections = RevHubOrientationOnRobot.UsbFacingDirection.values();
 
     public DcMotor lbDrive;
     public DcMotor lfDrive;
@@ -89,10 +87,8 @@ public class RobotHardwareSIGMA {
     }
 
     public void updateOrientation() {
-        RevHubOrientationOnRobot.LogoFacingDirection logo = logoFacingDirections[1];
-        RevHubOrientationOnRobot.UsbFacingDirection usb = usbFacingDirections[0];
         try {
-            RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logo, usb);
+            RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP);
             imu.initialize(new IMU.Parameters(orientationOnRobot));
         } catch (IllegalArgumentException e) {
         }
