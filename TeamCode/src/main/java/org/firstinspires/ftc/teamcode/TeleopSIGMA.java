@@ -35,8 +35,8 @@ public class TeleopSIGMA extends OpMode {
 
     static final double RAIL_MIN = 0.0;
     static final double RAIL_MAX = 2800.0;
-    static final double PINCH_OPEN = 0.18;
-    static final double PINCH_CLOSED = 0.30;
+    static final double PINCH_OPEN = 0.66;
+    static final double PINCH_CLOSED = 0.89;
     static final double EXTEND_IN = 0.42;
     static final double EXTEND_OUT = 0.12;
     static final double PIVOT_DOWN = 0.04;
